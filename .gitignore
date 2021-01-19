@@ -1,0 +1,14 @@
+**/*.asm
+**/*.elf
+**/*.ihx
+**/*.cdb
+**/*.lk
+**/*.map
+**/*.adb
+**/*.lst
+**/*.rel
+**/*.rst
+**/*.sym
+**/Result.log
+**/*.launch
+Debug

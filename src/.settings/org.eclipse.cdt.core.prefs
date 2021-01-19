@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+environment/project/0.1038320236/CWD/delimiter=;
+environment/project/0.1038320236/CWD/operation=replace
+environment/project/0.1038320236/CWD/value=${PROJECT_LOC}
+environment/project/0.1038320236/PWD/delimiter=;
+environment/project/0.1038320236/PWD/operation=replace
+environment/project/0.1038320236/PWD/value=${PROJECT_LOC}
+environment/project/0.1038320236/SDCC/delimiter=;
+environment/project/0.1038320236/SDCC/operation=replace
+environment/project/0.1038320236/SDCC/value=C\:\\Users\\SO000228\\Programs\\SDCC
+environment/project/0.1038320236/append=true
+environment/project/0.1038320236/appendContributed=true
