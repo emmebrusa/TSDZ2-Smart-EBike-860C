@@ -1,0 +1,22 @@
+TSDZ2 Open Source Firmware 20beta1.C for 860C display
+
+Motor changes
+
+  1 - Added field weakening function to increase the motor speed (by mspider65).
+  2 - Added other optimizations to motor control, torque sensor and cadence sensor (by mspider65).
+  3 - Added startup boost function in POWER assist mode, enable/disable and parameters at display.
+  4 - Added HYBRID assist mode, TORQUE + POWER, can be set on the display.
+  5 - Improved "Start-up without pedal rotation" function.
+  6 - Added a filter to the speed sensor to avoid problems of adjusting the distance from the magnet.
+  7 - Added error E03 cadence sensor failure.
+  8 - Added error E04 torque sensor failure.
+  8 - Added error E08 due to speed sensor failure or missing magnet.
+ 10 - Added "Assist with sensors error" function, to force assistance with sensors problem.
+
+Modified files mspider65
+ebike_app.c
+ebike_app.h
+main.c
+main.h
+motor.c
+

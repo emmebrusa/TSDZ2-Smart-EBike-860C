@@ -26,6 +26,7 @@ extern volatile uint8_t ui8_g_duty_cycle;
 extern volatile uint8_t ui8_fw_angle;
 extern volatile uint8_t ui8_controller_duty_cycle_target;
 extern volatile uint8_t ui8_g_foc_angle;
+extern volatile uint8_t ui8_hall_sensors_state;
 
 // motor erps
 extern volatile uint16_t ui16_motor_speed_erps;

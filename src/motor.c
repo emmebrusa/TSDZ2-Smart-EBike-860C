@@ -297,7 +297,8 @@ uint16_t ui16_PWM_cycles_counter_6 = 3;
 uint16_t ui16_PWM_cycles_counter_total = 0xffff;
 uint8_t ui8_motor_commutation_type = BLOCK_COMMUTATION;
 volatile uint16_t ui16_motor_speed_erps = 0;
-static uint8_t ui8_motor_rotor_absolute_angle;
+static uint8_t ui8_motor_rotor_absolute_angle = 0;
+volatile uint8_t ui8_hall_sensors_state = 0;
 
 
 // power variables
@@ -335,6 +336,7 @@ const static uint8_t ui8_pas_old_valid_state[4] = { 0x01, 0x03, 0x00, 0x02 };
 
 // wheel speed sensor
 volatile uint16_t ui16_wheel_speed_sensor_ticks = 0;
+volatile uint16_t ui16_wheel_speed_sensor_ticks_counter_min = 0;
 volatile uint32_t ui32_wheel_speed_sensor_ticks_total = 0;
 
 void read_battery_voltage(void);
@@ -396,7 +398,6 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
     // - calc motor speed in erps (ui16_motor_speed_erps)
     // - check so that motor is not rotating backwards, if it does, set ERPS to 0
     static uint8_t ui8_hall_sensors_state_last;
-    uint8_t ui8_hall_sensors_state;
 
     // read hall sensors signal pins and mask other pins
     // hall sensors sequence with motor forward rotation: C, CB, B, BA, A, AC, ..
@@ -818,33 +819,40 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 
         // check wheel speed sensor pin state
         uint8_t ui8_wheel_speed_sensor_pin_state = WHEEL_SPEED_SENSOR__PORT->IDR & WHEEL_SPEED_SENSOR__PIN;
+		
+		// check wheel speed sensor ticks counter min value
+		if(ui16_wheel_speed_sensor_ticks) { ui16_wheel_speed_sensor_ticks_counter_min = ui16_wheel_speed_sensor_ticks >> 3; }
+		else { ui16_wheel_speed_sensor_ticks_counter_min = WHEEL_SPEED_SENSOR_TICKS_COUNTER_MIN >> 3; }
 
-        // check if wheel speed sensor pin state has changed
-        if (ui8_wheel_speed_sensor_pin_state != ui8_wheel_speed_sensor_pin_state_old) {
-            // update old wheel speed sensor pin state
-            ui8_wheel_speed_sensor_pin_state_old = ui8_wheel_speed_sensor_pin_state;
+		if(!ui8_wheel_speed_sensor_ticks_counter_started ||
+		  (ui16_wheel_speed_sensor_ticks_counter > ui16_wheel_speed_sensor_ticks_counter_min)) {  
+			// check if wheel speed sensor pin state has changed
+			if (ui8_wheel_speed_sensor_pin_state != ui8_wheel_speed_sensor_pin_state_old) {
+				// update old wheel speed sensor pin state
+				ui8_wheel_speed_sensor_pin_state_old = ui8_wheel_speed_sensor_pin_state;
 
-            // only consider the 0 -> 1 transition
-            if (ui8_wheel_speed_sensor_pin_state) {
-                // check if first transition
-                if (!ui8_wheel_speed_sensor_ticks_counter_started) {
-                    // start wheel speed sensor ticks counter as this is the first transition
-                    ui8_wheel_speed_sensor_ticks_counter_started = 1;
-                } else {
-                    // check if wheel speed sensor ticks counter is out of bounds
-                    if (ui16_wheel_speed_sensor_ticks_counter < WHEEL_SPEED_SENSOR_TICKS_COUNTER_MAX) {
-                        ui16_wheel_speed_sensor_ticks = 0;
-                        ui16_wheel_speed_sensor_ticks_counter = 0;
-                        ui8_wheel_speed_sensor_ticks_counter_started = 0;
-                    } else {
-                        ui16_wheel_speed_sensor_ticks = ui16_wheel_speed_sensor_ticks_counter;
-                        ui16_wheel_speed_sensor_ticks_counter = 0;
-                        ++ui32_wheel_speed_sensor_ticks_total;
-                    }
-                }
-            }
-        }
-
+				// only consider the 0 -> 1 transition
+				if (ui8_wheel_speed_sensor_pin_state) {
+					// check if first transition
+					if (!ui8_wheel_speed_sensor_ticks_counter_started) {
+						// start wheel speed sensor ticks counter as this is the first transition
+						ui8_wheel_speed_sensor_ticks_counter_started = 1;
+					} else {
+						// check if wheel speed sensor ticks counter is out of bounds
+						if (ui16_wheel_speed_sensor_ticks_counter < WHEEL_SPEED_SENSOR_TICKS_COUNTER_MAX) {
+							ui16_wheel_speed_sensor_ticks = 0;
+							ui16_wheel_speed_sensor_ticks_counter = 0;
+							ui8_wheel_speed_sensor_ticks_counter_started = 0;
+						} else {
+							ui16_wheel_speed_sensor_ticks = ui16_wheel_speed_sensor_ticks_counter;
+							ui16_wheel_speed_sensor_ticks_counter = 0;
+							++ui32_wheel_speed_sensor_ticks_total;
+						}
+					}
+				}
+			}
+		}
+		
         // increment and also limit the ticks counter
         if (ui8_wheel_speed_sensor_ticks_counter_started)
             if (ui16_wheel_speed_sensor_ticks_counter < WHEEL_SPEED_SENSOR_TICKS_COUNTER_MIN) {
@@ -963,19 +971,6 @@ void calc_foc_angle(void) {
     // ---------------------------------------------------------------------------------------------------------------------
 
     ui16_l_x1048576 = p_configuration_variables->ui8_motor_inductance_x1048576;
-    /*
-    switch (p_configuration_variables->ui8_motor_inductance_x1048576) {
-        case 0:
-        case 2:
-            ui16_l_x1048576 = 142; // 48 V motor
-            break;
-        //case 1:
-        //case 3:
-        default:
-            ui16_l_x1048576 = 80; // 36 V motor
-            break;
-    }
-    */
 
     // calc IwL
     ui16_iwl_128 = ((uint32_t)((uint32_t)ui16_i_phase_current_x2 * ui16_l_x1048576) * ui32_w_angular_velocity_x16 ) >> 18;

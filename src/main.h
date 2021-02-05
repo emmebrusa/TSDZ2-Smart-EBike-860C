@@ -13,7 +13,7 @@
 //#define PWM_TIME_DEBUG
 //#define MAIN_TIME_DEBUG
 
-#define FW_VERSION 7
+//#define FW_VERSION 7
 
 // PWM related values
 // motor
@@ -75,7 +75,13 @@
 
 // Torque sensor values
 #define ADC_TORQUE_SENSOR_CALIBRATION_OFFSET    6
-#define COASTER_BRAKE_TORQUE_THRESHOLD          40
+#define ADC_TORQUE_SENSOR_OFFSET_DEFAULT		150
+// adc torque offset gap value for error
+#define ADC_TORQUE_SENSOR_OFFSET_THRESHOLD		25
+// adc torque delta range value for remapping
+#define ADC_TORQUE_SENSOR_RANGE_MIN	  			160
+// scale the torque assist target current
+#define TORQUE_ASSIST_FACTOR_DENOMINATOR		110
 
 /*---------------------------------------------------------
  NOTE: regarding motor start interpolation
@@ -86,8 +92,8 @@
  but a value of 25 may be good.
  ---------------------------------------------------------*/
 
-#define ADC_10_BIT_BATTERY_CURRENT_MAX                            106     // 17 amps
-#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        177     // 28 amps
+#define ADC_10_BIT_BATTERY_CURRENT_MAX                            106 // 17 amps
+#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        177 // 28 amps
 
 /*---------------------------------------------------------
  NOTE: regarding ADC battery current max
