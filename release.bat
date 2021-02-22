@@ -30,8 +30,8 @@ ECHO:
 ECHO Failed with error code %errorlevel%.
 ECHO:
 EXIT /b %errorlevel%
-
 pause
+
 @ECHO ON
 
 

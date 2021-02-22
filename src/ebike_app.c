@@ -74,6 +74,7 @@ static uint8_t ui8_assist_level = 0;
 static uint8_t ui8_riding_mode = OFF_MODE;
 static uint8_t ui8_riding_mode_parameter = 0;
 static uint8_t ui8_walk_assist_parameter = 0;
+static uint8_t ui8_cruise_parameter = 0;
 static uint8_t ui8_motor_enabled = 1;
 static uint8_t ui8_assist_without_pedal_rotation_threshold = 0;
 static uint8_t ui8_assist_without_pedal_rotation_enabled = 0;
@@ -1822,57 +1823,58 @@ static void communications_process_packages(uint8_t ui8_frame_type)
 		// lights state
 		ui8_lights_state = (ui8_rx_buffer[5] & (1 << 0)) ? 1: 0;
 
-		// walk assist / cruise function
+		// walk assist
 		uint8_t ui8_walk_assist = (ui8_rx_buffer[5] & (1 << 1)) ? 1: 0;
 		
 		// assist level
 		ui8_assist_level = (ui8_rx_buffer[5] & (1 << 2)) ? 1: 0;
 		
+		// cruise enabled
+		uint8_t ui8_cruise_enabled = (ui8_rx_buffer[5] & (1 << 3)) ? 1: 0;
+		
 		// battery max power target
 		m_configuration_variables.ui8_target_battery_max_power_div25 = ui8_rx_buffer[6];
 
 		// calculate max battery current in ADC steps from the received battery current limit
-		uint8_t ui8_adc_battery_current_max_temp_1 = (uint16_t)(ui8_battery_current_max * (uint8_t)100) / (uint16_t)BATTERY_CURRENT_PER_10_BIT_ADC_STEP_X100;
+		uint8_t ui8_adc_battery_current_max_temp_1 = (uint16_t)(ui8_battery_current_max * (uint8_t)100)
+					/ (uint16_t)BATTERY_CURRENT_PER_10_BIT_ADC_STEP_X100;
 
 		// calculate max battery current in ADC steps from the received power limit
-		uint32_t ui32_battery_current_max_x100 = ((uint32_t) m_configuration_variables.ui8_target_battery_max_power_div25 * 2500000) / ui16_battery_voltage_filtered_x1000;
+		uint32_t ui32_battery_current_max_x100 = ((uint32_t) m_configuration_variables.ui8_target_battery_max_power_div25 * 2500000)
+					/ ui16_battery_voltage_filtered_x1000;
 		uint8_t ui8_adc_battery_current_max_temp_2 = ui32_battery_current_max_x100 / BATTERY_CURRENT_PER_10_BIT_ADC_STEP_X100;
 
 		// set max battery current
 		ui8_adc_battery_current_max = ui8_min(ui8_adc_battery_current_max_temp_1, ui8_adc_battery_current_max_temp_2);
-
+		
 		// walk assist parameter
 		ui8_walk_assist_parameter = ui8_rx_buffer[7];
-
+		
 		// riding mode
 		if((ui8_walk_assist)&&(ui16_wheel_speed_x10 < WALK_ASSIST_THRESHOLD_SPEED_X10))
 			// enable walk assist depending on speed
 			ui8_riding_mode = WALK_ASSIST_MODE;
-		else if((ui8_walk_assist)&&(ui16_wheel_speed_x10 > CRUISE_THRESHOLD_SPEED_X10))
+		else if((ui8_cruise_enabled)&&(ui16_wheel_speed_x10 > CRUISE_THRESHOLD_SPEED_X10))
 			// enable cruise function depending on speed
-			ui8_riding_mode = CRUISE_MODE; 
+			ui8_riding_mode = CRUISE_MODE;
 		else
 			ui8_riding_mode = ui8_rx_buffer[8];
 		
 		// wheel max speed
 		m_configuration_variables.ui8_wheel_speed_max = ui8_rx_buffer[9];
 
-		// motor temperature limit function or throttle
-		if(ui8_rx_buffer[10] == 1)
-			m_configuration_variables.ui8_optional_ADC_function = TEMPERATURE_CONTROL;
-		else if(ui8_rx_buffer[10] == 2)
-			m_configuration_variables.ui8_optional_ADC_function = THROTTLE_CONTROL;
-		else
-			m_configuration_variables.ui8_optional_ADC_function = NOT_IN_USE;
+		// optional ADC function, temperature sensor or throttle or not in use
+		m_configuration_variables.ui8_optional_ADC_function = ui8_rx_buffer[10];
 
 		// virtual throttle
 		ui8_throttle_virtual = ui8_rx_buffer[11];
 
+		///////////////////////////////////////////////////////////////////////////////////////
+		
 		// now send data back
 		// ADC 10 bits battery voltage
-		ui16_temp = ui16_adc_battery_voltage_filtered;
-		ui8_tx_buffer[3] = (ui16_temp & 0xff);
-		ui8_tx_buffer[4] = ((uint8_t) (ui16_temp >> 4)) & 0x30;
+		ui8_tx_buffer[3] = (ui16_adc_battery_voltage_filtered & 0xff);
+		ui8_tx_buffer[4] = ((uint8_t) (ui16_adc_battery_voltage_filtered >> 4)) & 0x30;
 
 		// battery current
 		// ADC 10 bits each step current is 0.156
@@ -1882,9 +1884,8 @@ static void communications_process_packages(uint8_t ui8_frame_type)
 		ui8_tx_buffer[5] = ui8_battery_current_filtered_x10 / 2;
 
 		// wheel speed
-		ui16_temp = ui16_wheel_speed_x10;
-		ui8_tx_buffer[6] = (uint8_t) (ui16_temp & 0xff);
-		ui8_tx_buffer[7] = ((uint8_t) (ui16_temp >> 8)) & 0x07;
+		ui8_tx_buffer[6] = (uint8_t) (ui16_wheel_speed_x10 & 0xff);
+		ui8_tx_buffer[7] = ((uint8_t) (ui16_wheel_speed_x10 >> 8)) & 0x07;
 
 		// last 2 bits of adc_motor_current
 		ui8_tx_buffer[7] |= ((uint8_t) ((ui16_adc_battery_current & 0x300) >> 5));
@@ -1893,8 +1894,8 @@ static void communications_process_packages(uint8_t ui8_frame_type)
 		ui8_tx_buffer[8] = ui8_brakes_engaged;
 		// add the hall sensors state, that should be 3 bits only, value from 0 to 7
 		ui8_tx_buffer[8] |= (ui8_hall_sensors_state << 1);
-		// add pas pedal position
-		//ui8_tx_buffer[8] |= (ui8_pas_pedal_position_right << 4);
+		// available
+		//ui8_tx_buffer[8] |= (available << 4);
 
 		// throttle value from ADC
 		ui8_tx_buffer[9] = UI8_ADC_THROTTLE;
@@ -2057,12 +2058,10 @@ static void communications_process_packages(uint8_t ui8_frame_type)
                 (uint8_t) 100,
                 (uint8_t) PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT,
                 (uint8_t) PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN);
-
+		
 		// received target speed for cruise
 		ui16_wheel_speed_target_received_x10 = (uint16_t) (ui8_rx_buffer[15] * 10);
-
-
-		
+	
 		// Torque ADC offset set (Right ADC1, weight=0)
 		ui16_adc_pedal_torque_offset_fix = (((uint16_t) ui8_rx_buffer[51]) << 8) + ((uint16_t) ui8_rx_buffer[50]);
 		if (toffset_cycle_counter == TOFFSET_CYCLES) {
@@ -2102,14 +2101,12 @@ static void communications_process_packages(uint8_t ui8_frame_type)
 		m_configuration_variables.ui8_pedal_torque_per_10_bit_ADC_step_x100 = ui8_rx_buffer[83];
 	  
 		// torque sensor ADC threshold
-		if(ui8_assist_without_pedal_rotation_enabled)
-		{
+		if(ui8_assist_without_pedal_rotation_enabled) {
 			ui8_assist_without_pedal_rotation_threshold = ui8_rx_buffer[84];
 			if(ui8_assist_without_pedal_rotation_threshold > 100)
 				{ ui8_assist_without_pedal_rotation_threshold = 100; }
 		}
-		else
-		{
+		else {
 			ui8_assist_without_pedal_rotation_threshold = 0;
 		}
 	  

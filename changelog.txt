@@ -1,4 +1,4 @@
-TSDZ2 Open Source Firmware 20beta1.C for 860C display
+TSDZ2 Open Source Firmware v20.1C for 860C display
 
 Motor changes
 
@@ -13,7 +13,7 @@ Motor changes
   8 - Added error E08 due to speed sensor failure or missing magnet.
  10 - Added "Assist with sensors error" function, to force assistance with sensors problem.
 
-Modified files mspider65
+Changed files
 ebike_app.c
 ebike_app.h
 main.c
