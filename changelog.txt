@@ -10,7 +10,7 @@ Motor changes
   6 - Added a filter to the speed sensor to avoid problems of adjusting the distance from the magnet.
   7 - Added error E03 cadence sensor failure.
   8 - Added error E04 torque sensor failure.
-  8 - Added error E08 due to speed sensor failure or missing magnet.
+  9 - Added error E08 due to speed sensor failure or missing magnet.
  10 - Added "Assist with sensors error" function, to force assistance with sensors problem.
 
 Changed files
