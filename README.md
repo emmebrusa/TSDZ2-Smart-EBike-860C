@@ -19,6 +19,8 @@ For more details, see the project page: https://github.com/OpenSource-EBike-firm
 
 Additional wiki for this version: https://github.com/emmebrusa/TSDZ2-Smart-EBike-860C/wiki
 
+Source code 860C Color LCD: https://github.com/emmebrusa/Color_LCD_860C
+
 **IMPORTANT NOTES**
 * Installing this firmware will void your warranty of the TSDZ2 mid drive and KT-LCD3.
 * We are not responsible for any personal injuries or accidents caused by use of this firmware.
