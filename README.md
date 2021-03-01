@@ -15,7 +15,9 @@ It has the following benefits compared to the stock firmware:
 
 This project is being developed and maintained for free by a community of users. Some of them are developers who work professionally developing this type of technology for very well known companies.
 
-For more details, see the project page: https://github.com/OpenSource-EBike-firmware/TSDZ2_wiki/wiki 
+For more details, see the project page: https://github.com/OpenSource-EBike-firmware/TSDZ2_wiki/wiki
+
+Additional wiki for this version: https://github.com/emmebrusa/TSDZ2-Smart-EBike-860C/wiki
 
 **IMPORTANT NOTES**
 * Installing this firmware will void your warranty of the TSDZ2 mid drive and KT-LCD3.
