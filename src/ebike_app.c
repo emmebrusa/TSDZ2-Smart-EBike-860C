@@ -1903,7 +1903,7 @@ static void communications_process_packages(uint8_t ui8_frame_type)
 		if(m_configuration_variables.ui8_optional_ADC_function == TEMPERATURE_CONTROL)
 		{
 			// temperature value
-			ui8_tx_buffer[10] = ui16_adc_motor_temperature_filtered;
+			ui8_tx_buffer[10] = (uint8_t) (ui16_motor_temperature_filtered_x10 / 10);
 		}
 		else
 		{
