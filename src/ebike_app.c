@@ -1384,7 +1384,7 @@ static void check_system()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // check torque sensor
-    if (((ui16_adc_pedal_torque_offset > 250) ||
+    if (((ui16_adc_pedal_torque_offset > 300) ||
 		(ui16_adc_pedal_torque_offset < 10) ||
 		(ui16_adc_pedal_torque > 500) ||
 		((ui8_adc_pedal_torque_offset_error)&&(ui8_torque_sensor_calibration_enabled)))

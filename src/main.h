@@ -77,7 +77,7 @@
 #define ADC_TORQUE_SENSOR_CALIBRATION_OFFSET    6
 #define ADC_TORQUE_SENSOR_OFFSET_DEFAULT		150
 // adc torque offset gap value for error
-#define ADC_TORQUE_SENSOR_OFFSET_THRESHOLD		25
+#define ADC_TORQUE_SENSOR_OFFSET_THRESHOLD		35
 // adc torque delta range value for remapping
 #define ADC_TORQUE_SENSOR_RANGE_MIN	  			160
 // scale the torque assist target current
