@@ -13,16 +13,34 @@
 //#define PWM_TIME_DEBUG
 //#define MAIN_TIME_DEBUG
 
-//#define FW_VERSION 7
+#define FW_VERSION 12
+
+/*---------------------------------------------------------
+ NOTE: regarding motor rotor offset
+
+ The motor rotor offset should be as close to 0 as
+ possible. You can try to tune with the wheel in the air,
+ full throttle and look at the batttery current. Adjust
+ for the lowest battery current possible.
+ ---------------------------------------------------------*/
+#define MOTOR_ROTOR_OFFSET_ANGLE  (uint8_t)4
+#define PHASE_ROTOR_ANGLE_30  (uint8_t)((uint8_t)21  + MOTOR_ROTOR_OFFSET_ANGLE - (uint8_t)64)
+#define PHASE_ROTOR_ANGLE_90  (uint8_t)((uint8_t)64  + MOTOR_ROTOR_OFFSET_ANGLE - (uint8_t)64)
+#define PHASE_ROTOR_ANGLE_150 (uint8_t)((uint8_t)107 + MOTOR_ROTOR_OFFSET_ANGLE - (uint8_t)64)
+#define PHASE_ROTOR_ANGLE_210 (uint8_t)((uint8_t)149 + MOTOR_ROTOR_OFFSET_ANGLE - (uint8_t)64)
+#define PHASE_ROTOR_ANGLE_270 (uint8_t)((uint8_t)192 + MOTOR_ROTOR_OFFSET_ANGLE - (uint8_t)64)
+#define PHASE_ROTOR_ANGLE_330 (uint8_t)((uint8_t)235 + MOTOR_ROTOR_OFFSET_ANGLE - (uint8_t)64)
 
 // PWM related values
 // motor
 #define PWM_CYCLES_SECOND                                       19047U // 52us (PWM period)
-#define PWM_CYCLES_COUNTER_MAX                                  3800U  // 5 erps minimum speed -> 1/5 = 200 ms; 200 ms / 50 us = 4000 (3125 at 15.625KHz)
-#define DOUBLE_PWM_CYCLES_SECOND                                38094 // 25us (2 irq x PWM period)
+#define HALL_COUNTER_FREQ                                       250000U // 250KHz or 4us
+#define HALL_COUNTER_INTERP_MAX                                 4166 // (HALL_COUNTER_FREQ/MOTOR_ROTOR_INTERPOLATION_MIN_ERPS/6)
 // ramp up/down PWM cycles count
-#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT             195    // 160 -> 160 * 64 us for every duty cycle increment at 15.625KHz
+#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_CADENCE_OFFSET      50     // PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP offset for cadence assist mode
+#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT             195    // (should be less than 255-50->205) 160 -> 160 * 64 us for every duty cycle increment at 15.625KHz
 #define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN                 24     // 20 -> 20 * 64 us for every duty cycle increment at 15.625KHz
+#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_STARTUP             60     // Initial RAMP UP at motor startup
 #define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_DEFAULT           49     // 40 -> 40 * 64 us for every duty cycle decrement at 15.625KHz
 #define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_MIN               10     // 8 -> 8 * 64 us for every duty cycle decrement at 15.625KHz
 #define MOTOR_OVER_SPEED_ERPS                                   650    // motor max speed | 30 points for the sinewave at max speed (less than PWM_CYCLES_SECOND/30)
@@ -39,11 +57,6 @@
 #define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MAX                    165   // (135 at 15,625KHz) something like 200 m/h with a 6'' wheel
 #define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MIN                    39976 // could be a bigger number but will make for a slow detection of stopped wheel speed
 
-
-#define PWM_DUTY_CYCLE_MAX                                        254
-#define MIDDLE_SVM_TABLE                                          106
-#define MIDDLE_PWM_COUNTER                                        105
-
 /*---------------------------------------------------------
  NOTE: regarding duty cycle (PWM) ramping
 
@@ -54,24 +67,50 @@
  low values for acceleration.
  ---------------------------------------------------------*/
 
-#define MOTOR_ROTOR_OFFSET_ANGLE                                  10
-#define MOTOR_ROTOR_ANGLE_90                                      (63  + MOTOR_ROTOR_OFFSET_ANGLE)
-#define MOTOR_ROTOR_ANGLE_150                                     (106 + MOTOR_ROTOR_OFFSET_ANGLE)
-#define MOTOR_ROTOR_ANGLE_210                                     (148 + MOTOR_ROTOR_OFFSET_ANGLE)
-#define MOTOR_ROTOR_ANGLE_270                                     (191 + MOTOR_ROTOR_OFFSET_ANGLE)
-#define MOTOR_ROTOR_ANGLE_330                                     (233 + MOTOR_ROTOR_OFFSET_ANGLE)
-#define MOTOR_ROTOR_ANGLE_30                                      (20  + MOTOR_ROTOR_OFFSET_ANGLE)
+#define PWM_DUTY_CYCLE_MAX                                        254
+#define MIDDLE_SVM_TABLE                                          106
+#define MIDDLE_PWM_COUNTER                                        105
+#define PWM_DUTY_CYCLE_STARTUP                                    30    // Initial PWM Duty Cycle at motor startup
+	
+//#define MOTOR_ROTOR_ERPS_START_INTERPOLATION_60_DEGREES           10
 
-/*---------------------------------------------------------
- NOTE: regarding motor rotor offset
+/* Hall Sensors NOTE! - results after Hall sensor calibration experiment
+Dai calcoli risulta che Trise - Tfall = 20 e cioè 80 us (1 Hall counter step e' 4us).
+Quindi Trise è molto più lungo di Tfall. Quindi le transizioni del sensore Hall vengono rilevate
+con un ritardo diverso in funzione della transizione del segnale. Quindi gli stati 6,3,5 (fronte di
+salita) vengono rilevati con un ritardo di 80us (o 20 step) maggiore rispetto agli stati 2,1,4.
+Quindi negli stati 6,3,5 va sommato 20 (20x4us=80us) al contatore Hall usato per l'interpolazione,
+visto che è partito con 80us di ritardo rispetto agli altri stati. In questo modo
+il contatore Hall sarà allineato allo stesso modo per tutti gli stati, ma sarà comunque in ritardo
+di Tfall per tutti gli stati. Questo ritardo fisso viene gestito con un offset fisso da sommare
+al contatore. Questo spiega la necessità dell'offset fisso che si è reso necessario fino ad ora.
+Visto che il valore attuale dell'offset fisso è 18, si deve sommare 28 (20+8) agli stati 6,3,5
+e 8 agli stati 2,1,4 poichè (28+8)/2=18. Di questo 8 (8x4=32us), 6,5 (6,56*4=26,25us) servono a
+compensare il ritardo fisso fra la lettura del contatore Hall e l'applicazione delle fasi che
+avviene con un ritardo fisso pari a mezzo ciclo PWM (1/19047 = 52,5us, 52,5/2=26,25us).
+Purtroppo non c'è modo di calcolare i valori assoluti di Trise e Tfall utilizzando i contatori
+Hall ma solo la differenza fra i due valori.
+In realtà sarebbe possibile misurando con precisionea la corrente a diverse velocità prestabilite
+del motore. Mantenedo fissa la velocità si fa variare il duty cycle, e l'offset del contatore hall
+e si trova il valore di offset per cui la corrente assorbita è minima per una data velocita.
+Facendo alcune rilevazioni e poi una regressione lineare, sarebbe poi possibile ottenere quali sono
+gli offset del contatore Hall e del'angolo della phase ottimali da applicare.
+Il problema è che la misura di corrente fornita dal controller è troppo grossolana e si dovrebbe
+usare uno strumento di precisione.
+***************************************
+Test effettuato il 21/1/2012
+MOTOR_ROTOR_OFFSET_ANGLE:  10 - 6 -> 4
+HALL_COUNTER_OFFSET_DOWN:  8 + 15 -> 23
+HALL_COUNTER_OFFSET_UP:   28 + 15 -> 43
+****************************************
+*/
 
- The motor rotor offset should be as close to 0 as
- possible. You can try to tune with the wheel in the air,
- full throttle and look at the batttery current. Adjust
- for the lowest battery current possible.
- ---------------------------------------------------------*/
+#define HALL_COUNTER_OFFSET_UP                  44
+#define HALL_COUNTER_OFFSET_DOWN                23
+#define FW_HALL_COUNTER_OFFSET_MAX              6
 
-#define MOTOR_ROTOR_ERPS_START_INTERPOLATION_60_DEGREES           10
+
+#define MOTOR_ROTOR_INTERPOLATION_MIN_ERPS      10
 
 // Torque sensor values
 #define ADC_TORQUE_SENSOR_CALIBRATION_OFFSET    6
@@ -91,9 +130,10 @@
  interpolation 60 degrees. Must be found experimentally
  but a value of 25 may be good.
  ---------------------------------------------------------*/
-
-#define ADC_10_BIT_BATTERY_CURRENT_MAX                            106 // 17 amps
-#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        177 // 28 amps
+#define ADC_10_BIT_BATTERY_CURRENT_MAX                            112	// 18 amps
+#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        187	// 30 amps
+//#define ADC_10_BIT_BATTERY_CURRENT_MAX                            106	// 17 amps
+//#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        177	// 28 amps
 
 /*---------------------------------------------------------
  NOTE: regarding ADC battery current max

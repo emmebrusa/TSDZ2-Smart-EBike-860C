@@ -9,6 +9,6 @@
 #ifndef _PWM_H
 #define _PWM_H
 
-void pwm_init_bipolar_4q(void);
+void pwm_init(void);
 
 #endif /* _PWM_H_ */

@@ -1,0 +1,197 @@
+// -----------------------------------------------------------------------------
+// REMOVE USELESS TNZ
+// 1 cycle and 2 bytes less
+// -----------------------------------------------------------------------------
+replace restart {
+	dec %1
+	tnz %1
+} by {
+    ; peephole replaced dec + tnz + jrne with dec + jrne
+	dec %1
+}
+
+
+// -----------------------------------------------------------------------------
+// REMOVE USELESS LD a
+// 1 cycle and 2 bytes less
+// -----------------------------------------------------------------------------
+
+replace restart {
+	ld	a, %1
+	cp	a, %2
+	jreq   %3
+	ld	a, %1
+} by {
+    ; peephole replaced load + load with mov
+	ld	a, %1
+	cp	a, %2
+	jreq   %3
+} if notUsed('n'), notUsed('z'), notUsed('c')
+
+
+// -----------------------------------------------------------------------------
+// REPLACE LD + LD  WITH MOV
+// 2 cycles, 6 bytes versus 1 cycles, 5 bytes
+// -----------------------------------------------------------------------------
+
+replace restart {
+    ld    a, %1
+	ld    %2, a
+} by {
+    ; peephole replaced load + load with mov
+    mov %2, %1
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSame(%2 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%2 ',' '['), notSimilar(%1 ',' '[')
+
+
+// -----------------------------------------------------------------------------
+// REPLACE LD + SRL + JRNC WITH BTJF
+// 3/4 cycles, 6 bytes versus 2/3 cycles, 5 bytes
+// -----------------------------------------------------------------------------
+
+replace restart {
+    ld    a, %1
+    srl   a
+    jrnc  %2
+} by {
+    ; peephole replaced load + shift-right + jump-if-no-carry with btjf
+    btjf  %1, #0, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+
+// -----------------------------------------------------------------------------
+// REPLACE LD + BCP + JRNE WITH BTJT
+// 3/4 cycles, 7 bytes versus 2/3 cycles, 5 bytes
+// -----------------------------------------------------------------------------
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x01
+    jrne  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-not-zero with btjt
+    btjt  %1, #0, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x02
+    jrne  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-not-zero with btjt
+    btjt  %1, #1, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x04
+    jrne  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-not-zero with btjt
+    btjt  %1, #2, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x08
+    jrne  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-not-zero with btjt
+    btjt  %1, #3, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x10
+    jrne  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-not-zero with btjt
+    btjt  %1, #4, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x20
+    jrne  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-not-zero with btjt
+    btjt  %1, #5, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x40
+    jrne  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-not-zero with btjt
+    btjt  %1, #6, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+
+// -----------------------------------------------------------------------------
+// REPLACE LD + BCP + JREQ WITH BTJF
+// 3/4 cycles, 7 bytes versus 2/3 cycles, 5 bytes
+// -----------------------------------------------------------------------------
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x01
+    jreq  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-zero with btjf
+    btjf  %1, #0, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x02
+    jreq  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-zero with btjf
+    btjf  %1, #1, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x04
+    jreq  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-zero with btjf
+    btjf  %1, #2, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x08
+    jreq  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-zero with btjf
+    btjf  %1, #3, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x10
+    jreq  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-zero with btjf
+    btjf  %1, #4, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x20
+    jreq  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-zero with btjf
+    btjf  %1, #5, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+
+replace restart {
+    ld    a, %1
+    bcp   a, #0x40
+    jreq  %2
+} by {
+    ; peephole replaced load + bit-compare + jump-if-zero with btjf
+    btjf  %1, #6, %2
+} if notUsed('a'), notUsed('n'), notUsed('z'), notSame(%1 'xl' 'xh' 'yl' 'yh' '(x)' '(y)'), notSimilar(%1 ',' '[' '#')
+

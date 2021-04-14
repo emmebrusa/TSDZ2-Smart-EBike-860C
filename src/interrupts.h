@@ -9,15 +9,12 @@
 #ifndef _INTERRUPTS_H_
 #define _INTERRUPTS_H_
 
-#define EXTI_PORTA_IRQHANDLER 3             // Not used
-#define EXTI_PORTB_IRQHANDLER 4             // Not used
-#define EXTI_PORTC_IRQHANDLER 5             // Initilized for brake signal but not used
-#define EXTI_PORTD_IRQHANDLER 6             // Not used
-#define EXTI_PORTE_IRQHANDLER 7             // Not used
-#define TIM1_CAP_COM_IRQHANDLER 	12      // Motor control loop (64us)
-#define TIM2_UPD_OVF_TRG_BRK_IRQHANDLER 13  // Not used
-#define UART2_RX_IRQHANDLER 21              // UART Data received
-#define UART2_TX_IRQHANDLER 20              // UART Data sent
-#define ADC1_IRQHANDLER 22                  // ADC1 End Of Conversion (not used)
+#define EXTI_HALL_A_IRQ  7              // ITC_IRQ_PORTE - Hall sensor A rise/fall detection
+#define EXTI_HALL_B_IRQ  6              // ITC_IRQ_PORTD - Hall sensor B rise/fall detection
+#define EXTI_HALL_C_IRQ  5              // ITC_IRQ_PORTC - Hall sensor C rise/fall detection
+#define TIM1_CAP_COM_IRQHANDLER 12      // ITC_IRQ_TIM1_CAPCOM - PWM control loop (52us)
+#define TIM4_OVF_IRQHANDLER 23          // ITC_IRQ_TIM4_OVF - TIM 4 overflow: 1ms counter
+#define UART2_TX_IRQHANDLER 20          // ITC_IRQ_UART2_TX - UART Data sent
+#define UART2_RX_IRQHANDLER 21          // ITC_IRQ_UART2_RX - UART Data received
 
 #endif

@@ -9,7 +9,8 @@
 #ifndef _TIMERS_H_
 #define _TIMERS_H_
 
-void timer2_init(void);
-void timer3_init(void);
+void timers_init(void);
+
+extern volatile uint8_t ui8_tim4_counter;
 
 #endif /* _TIMERS_H_ */

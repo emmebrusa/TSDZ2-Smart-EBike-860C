@@ -18,8 +18,7 @@
 #define HYBRID_ASSIST_MODE						  5
 #define CRUISE_MODE                               6
 #define WALK_ASSIST_MODE                          7
-//#define WALK_ASSIST_MODE                          5
-//#define CRUISE_MODE                               6
+#define MOTOR_CALIBRATION_MODE                    8
 
 // walk assist
 #define WALK_ASSIST_THRESHOLD_SPEED_X10           70  // 70 -> 7.0 kph, this is the maximum speed limit from which walk assist can be activated
