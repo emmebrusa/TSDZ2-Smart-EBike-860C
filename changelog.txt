@@ -1,7 +1,49 @@
+TSDZ2 Open Source Firmware v20.1C.2 for 860C display
+
+  1 - Updated to v12 version of mspider65 (Hall sensor calibration missing)
+  2 - Improved the problem of delay in restarting with bike in motion (from mspider65 v12)
+  3 - Improved standing start response.
+  4 - Decreased eMTB torque offset, it was too sensitive at the start.
+  5 - Added "Motor fast stop" for a quick stop of the motor.
+  6 - Added "Motor deceleration" adjustable 0-100%, alternative to "Motor fast stop".
+  7 - Speed sensor error threshold time increased (E08).
+  8 - Added enable / disable "Field Weakening".
+Changed files
+  adc.c
+  common.h
+  ebike_app.c
+  ebike_app.h
+  interrupts.h
+  main.c
+  motor.h
+  motor.c
+  pwm.c
+  pwm.h
+  timers.c
+  timers.h
+  main.c
+  main.h
+  uart.c
+  Makefile_linux
+  Makefile_windows
+Deleted files
+  watchdog.c
+  watchdog.h
+Added file
+  peep.txt
+
+
+TSDZ2 Open Source Firmware v20.1C.1 for 860C display
+
+  1 - temperature problem fixed.
+  2 - Torque sensor error threshold changed (E02).
+Changed files
+  ebike_app.c
+
+
 TSDZ2 Open Source Firmware v20.1C for 860C display
 
 Motor changes
-
   1 - Added field weakening function to increase the motor speed (by mspider65).
   2 - Added other optimizations to motor control, torque sensor and cadence sensor (by mspider65).
   3 - Added startup boost function in POWER assist mode, enable/disable and parameters at display.
@@ -12,11 +54,10 @@ Motor changes
   8 - Added error E04 torque sensor failure.
   9 - Added error E08 due to speed sensor failure or missing magnet.
  10 - Added "Assist with sensors error" function, to force assistance with sensors problem.
-
 Changed files
-ebike_app.c
-ebike_app.h
-main.c
-main.h
-motor.c
+  ebike_app.c
+  ebike_app.h
+  main.c
+  main.h
+  motor.c
 
