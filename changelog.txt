@@ -8,6 +8,8 @@ TSDZ2 Open Source Firmware v20.1C.2 for 860C display
   6 - Added "Motor deceleration" adjustable 0-100%, alternative to "Motor fast stop".
   7 - Speed sensor error threshold time increased (E08).
   8 - Added enable / disable "Field Weakening".
+  9 - PWM display in percentage 0-100%
+ 10 - Added to 860C, Motor power threshold (auto / manual) for field and graph.
 Changed files
   adc.c
   common.h
