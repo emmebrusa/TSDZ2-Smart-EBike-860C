@@ -682,7 +682,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         // check if to decrease, increase or maintain duty cycle
         if ((ui8_g_duty_cycle > ui8_controller_duty_cycle_target)
                 || (ui8_adc_battery_current_filtered > ui8_controller_adc_battery_current_target)
-                || (ui8_adc_motor_phase_current > ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX)
+                || (ui8_adc_motor_phase_current > ui8_adc_motor_phase_current_max)
                 || (ui16_hall_counter_total < (HALL_COUNTER_FREQ / MOTOR_OVER_SPEED_ERPS))
                 || (UI8_ADC_BATTERY_VOLTAGE < ui8_adc_battery_voltage_cut_off)
                 || (ui8_brake_state)) {

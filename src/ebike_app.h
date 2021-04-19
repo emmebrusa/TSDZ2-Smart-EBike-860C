@@ -15,6 +15,7 @@
 // cadence sensor
 extern uint16_t ui16_cadence_ticks_count_min_speed_adj;
 extern volatile uint8_t ui8_pedal_cadence_fast_stop;
+extern volatile uint8_t ui8_adc_motor_phase_current_max;
 
 // Torque sensor coaster brake engaged threshold value
 extern uint8_t ui8_adc_coaster_brake_threshold;
