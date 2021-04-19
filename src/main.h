@@ -130,7 +130,7 @@ HALL_COUNTER_OFFSET_UP:   28 + 15 -> 43
  interpolation 60 degrees. Must be found experimentally
  but a value of 25 may be good.
  ---------------------------------------------------------*/
-#define ADC_10_BIT_BATTERY_CURRENT_MAX                            112	// 18 amps
+#define ADC_10_BIT_BATTERY_CURRENT_MAX                            137	// 22 amps
 #define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        187	// 30 amps
 //#define ADC_10_BIT_BATTERY_CURRENT_MAX                            106	// 17 amps
 //#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        177	// 28 amps
