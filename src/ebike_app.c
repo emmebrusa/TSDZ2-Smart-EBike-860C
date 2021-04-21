@@ -553,13 +553,13 @@ static void ebike_control_motor(void)
             ui8_duty_cycle_target = PWM_DUTY_CYCLE_MAX;
         }
 
-		if(ui16_motor_speed_erps < 50) {
+		if((ui16_motor_speed_erps < 50)&&(ui8_riding_mode != CADENCE_ASSIST_MODE)) {
 			ui8_duty_cycle_ramp_up_inverse_step = map_ui8((uint8_t)(ui16_motor_speed_erps),
-                (uint8_t)0,
-                (uint8_t)50,
-                (uint8_t)PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_STARTUP,
-                (uint8_t)ui8_duty_cycle_ramp_up_inverse_step_default);
-
+				(uint8_t)0,
+				(uint8_t)50,
+				(uint8_t)PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_STARTUP,
+				(uint8_t)ui8_duty_cycle_ramp_up_inverse_step_default);
+					
 			ui8_duty_cycle_ramp_down_inverse_step = PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_MIN;
 		}
 		
