@@ -225,10 +225,10 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             mov _ui8_temp+0, _ui8_hall_state_irq+0
             mov _ui16_b+0, _ui8_hall_60_ref_irq+0
             mov _ui16_b+1, _ui8_hall_60_ref_irq+1
-            pop cc              // enable interrupts (restores previous value of Interrupt mask)
-                                // Hall GPIO buffered interrupt could fire now
             mov _ui16_a+0, 0x5328 // TIM3->CNTRH
             mov _ui16_a+1, 0x5329 // TIM3->CNTRL
+            pop cc              // enable interrupts (restores previous value of Interrupt mask)
+                                // Hall GPIO buffered interrupt could fire now
         __endasm;
         #endif
         // ui8_temp stores the current Hall sensor state

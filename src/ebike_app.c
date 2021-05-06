@@ -1419,7 +1419,7 @@ static void check_system()
 	// check speed sensor
 	if(ui16_motor_speed_erps > MOTOR_ERPS_SPEED_THRESHOLD) { ui16_check_speed_sensor_counter++; }
 	if(ui16_wheel_speed_x10) { ui16_check_speed_sensor_counter = 0; }
-	  
+	
 	if(ui16_check_speed_sensor_counter > CHECK_SPEED_SENSOR_COUNTER_THRESHOLD) {
 		// set speed sensor error code
 		ui8_m_system_state |= ERROR_SPEED_SENSOR;
