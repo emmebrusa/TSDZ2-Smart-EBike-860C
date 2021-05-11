@@ -18,7 +18,7 @@ extern volatile uint8_t ui8_pedal_cadence_fast_stop;
 extern volatile uint8_t ui8_adc_motor_phase_current_max;
 
 // Torque sensor coaster brake engaged threshold value
-extern uint8_t ui8_adc_coaster_brake_threshold;
+extern uint16_t ui16_adc_coaster_brake_threshold;
 
 typedef struct _configuration_variables {
     uint16_t ui16_battery_low_voltage_cut_off_x10;

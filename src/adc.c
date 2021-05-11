@@ -23,7 +23,7 @@ void adc_init(void) {
 
     ADC1_DeInit();
     // Single conversion, Left alignement, Last channel = 7
-    ADC1_ConversionConfig(ADC1_CONVERSIONMODE_SINGLE, ADC1_CHANNEL_7, ADC1_ALIGN_LEFT);
+    ADC1_ConversionConfig(ADC1_CONVERSIONMODE_SINGLE, ADC1_CHANNEL_7, ADC1_ALIGN_RIGHT);
     // ADC clock = CPU clock/3
     ADC1_PrescalerConfig(ADC1_PRESSEL_FCPU_D3);
     ADC1_SchmittTriggerConfig(ADC1_SCHMITTTRIG_CHANNEL4, DISABLE);

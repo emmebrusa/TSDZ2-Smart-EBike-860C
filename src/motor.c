@@ -22,23 +22,26 @@
 #include "common.h"
 
 #define SVM_TABLE_LEN   256
-#define SIN_TABLE_LEN   59
+#define ASIN_TABLE_MAX  127
 
-static const uint8_t ui8_svm_table[SVM_TABLE_LEN] = { 199, 200, 202, 203, 204, 205, 206, 207, 208, 208, 209, 210, 210, 211, 211, 211,
-        212, 212, 212, 212, 212, 212, 212, 212, 211, 211, 211, 210, 210, 209, 208, 208, 207, 206, 206, 205, 204, 203,
-        202, 201, 200, 199, 196, 192, 188, 184, 180, 176, 172, 167, 163, 159, 154, 150, 146, 141, 137, 133, 128, 124,
-        119, 115, 110, 106, 102, 97, 93, 88, 84, 79, 75, 71, 66, 62, 58, 53, 49, 45, 40, 36, 32, 28, 24, 20, 16, 13, 12,
-        11, 10, 9, 8, 7, 6, 6, 5, 4, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 4, 5, 6, 7, 8, 9,
-        10, 12, 13, 14, 13, 12, 10, 9, 8, 7, 6, 5, 4, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4,
-        4, 5, 6, 6, 7, 8, 9, 10, 11, 12, 13, 16, 20, 24, 28, 32, 36, 40, 45, 49, 53, 58, 62, 66, 71, 75, 79, 84, 88, 93,
-        97, 102, 106, 110, 115, 119, 124, 128, 133, 137, 141, 146, 150, 154, 159, 163, 167, 172, 176, 180, 184, 188,
-        192, 196, 199, 200, 201, 202, 203, 204, 205, 206, 206, 207, 208, 208, 209, 210, 210, 211, 211, 211, 212, 212,
-        212, 212, 212, 212, 212, 212, 211, 211, 211, 210, 210, 209, 208, 208, 207, 206, 205, 204, 203, 202, 200, 199,
-        198 };
+static const uint8_t ui8_svm_table[SVM_TABLE_LEN] = { 202, 203, 205, 206, 207, 208, 209, 210, 211, 211, 212, 213, 213,
+        214, 214, 214, 215, 215, 215, 215, 215, 215, 215, 215, 214, 214, 214, 213, 213, 212, 211, 211, 210, 209, 208,
+        208, 207, 206, 205, 204, 202, 201, 199, 195, 191, 187, 183, 178, 174, 170, 165, 161, 157, 152, 148, 143, 139,
+        134, 130, 125, 121, 116, 112, 108, 103, 99, 94, 90, 85, 81, 76, 72, 67, 63, 58, 54, 50, 45, 41, 37, 32, 28, 24,
+        20, 16, 14, 13, 11, 10, 9, 8, 7, 7, 6, 5, 4, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4,
+        4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 13, 12, 10, 9, 8, 7, 6, 5, 4, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 1, 2, 2, 3, 4, 4, 5, 6, 7, 7, 8, 9, 10, 11, 13, 14, 16, 20, 24, 28, 32, 37, 41, 45, 50, 54, 58, 63, 67, 72,
+        76, 81, 85, 90, 94, 99, 103, 108, 112, 116, 121, 125, 130, 134, 139, 143, 148, 152, 157, 161, 165, 170, 174,
+        178, 183, 187, 191, 195, 199, 201, 202, 204, 205, 206, 207, 208, 208, 209, 210, 211, 211, 212, 213, 213, 214,
+        214, 214, 215, 215, 215, 215, 215, 215, 215, 215, 214, 214, 214, 213, 213, 212, 211, 211, 210, 209, 208, 207,
+        206, 205, 203, 202, 201 };
 
-static const uint8_t ui8_sin_table[SIN_TABLE_LEN] = { 3, 6, 9, 12, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 54, 57, 60,
-        63, 66, 68, 71, 73, 76, 78, 81, 83, 86, 88, 90, 92, 95, 97, 99, 101, 102, 104, 106, 108, 109, 111, 113, 114,
-        115, 117, 118, 119, 120, 121, 122, 123, 124, 125, 125, 126, 126, 127 };
+static const uint8_t ui8_asin_table[128] = { 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7,
+        8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15, 16, 16, 16, 17, 17,
+        18, 18, 18, 19, 19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 23, 23, 23, 24, 24, 25, 25, 25, 26, 26, 27, 27, 27, 28,
+        28, 29, 29, 29, 30, 30, 31, 31, 32, 32, 33, 33, 33, 34, 34, 35, 35, 36, 36, 37, 38, 38, 39, 39, 40, 40, 41, 42,
+        42, 43, 43, 44, 45, 46, 46, 47, 48, 49, 50, 51, 52, 53, 54, 56, 58, 59 };
+
 
 // motor variables
 uint8_t ui8_hall_360_ref_valid = 0;
@@ -53,7 +56,7 @@ volatile uint8_t ui8_hall_sensors_state = 0;
 volatile uint8_t ui8_controller_duty_cycle_ramp_up_inverse_step = PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT;
 volatile uint8_t ui8_controller_duty_cycle_ramp_down_inverse_step = PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_DEFAULT;
 volatile uint16_t ui16_adc_battery_voltage_filtered = 0;
-volatile uint8_t ui8_adc_battery_voltage_cut_off = 0xff;
+volatile uint16_t ui16_adc_voltage_cut_off = 0xfff;
 volatile uint8_t ui8_adc_battery_current_filtered = 0;
 volatile uint8_t ui8_controller_adc_battery_current_target = 0;
 volatile uint8_t ui8_g_duty_cycle = 0;
@@ -69,6 +72,11 @@ static uint8_t ui8_counter_duty_cycle_ramp_down = 0;
 // battery current variables
 static uint8_t ui8_adc_battery_current_acc = 0;
 static uint8_t ui8_adc_motor_phase_current;
+
+// ADC Values
+volatile uint16_t ui16_adc_voltage;
+volatile uint16_t ui16_adc_torque;
+volatile uint16_t ui16_adc_throttle;
 
 // brakes
 volatile uint8_t ui8_brake_state = 0;
@@ -118,6 +126,11 @@ volatile uint16_t ui16_pwm_cnt_up_irq = 0;
 extern volatile uint8_t ui8_main_time;
 #endif
 
+#ifdef HALL_DEBUG
+volatile uint8_t ui8_hall_val_errors = 0;
+volatile uint8_t ui8_hall_seq_errors = 0;
+#endif
+
 // PWM cycle interrupt
 // TIM1 clock is 16MHz and count mode is "Center Aligned"
 // Every cycle TIM1 counts up from 0 to 420 and then down from 420 to 0 (26.25+26.25us = 52.5us total time)
@@ -139,8 +152,8 @@ extern volatile uint8_t ui8_main_time;
 #define __interrupt(x)  // Disable Eclipse syntax check on interrupt keyword
 #endif
 
-volatile uint8_t  ui8_hall_state_irq = 0;
-volatile uint8_t  ui8_hall_60_ref_irq[2];
+volatile uint8_t ui8_hall_state_irq = 0;
+volatile uint8_t ui8_hall_60_ref_irq[2];
 
 
 // Interrupt routines called on Hall sensor state change (Highest priority)
@@ -213,6 +226,7 @@ static uint16_t ui16_c;
 
 static uint8_t ui8_temp;
 
+
 void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 {
     // bit 5 of TIM1->CR1 contains counter direction (0=up, 1=down)
@@ -225,10 +239,10 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             mov _ui8_temp+0, _ui8_hall_state_irq+0
             mov _ui16_b+0, _ui8_hall_60_ref_irq+0
             mov _ui16_b+1, _ui8_hall_60_ref_irq+1
-            pop cc              // enable interrupts (restores previous value of Interrupt mask)
-                                // Hall GPIO buffered interrupt could fire now
             mov _ui16_a+0, 0x5328 // TIM3->CNTRH
             mov _ui16_a+1, 0x5329 // TIM3->CNTRL
+            pop cc              // enable interrupts (restores previous value of Interrupt mask)
+                                // Hall GPIO buffered interrupt could fire now
         __endasm;
         #endif
         // ui8_temp stores the current Hall sensor state
@@ -262,6 +276,11 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                 ui16_hall_360_ref = ui16_b;
                 // calculate hall ticks between the last two Hall transitions (for Hall calibration)
                 ui16_hall_calib_cnt[3] = ui16_hall_360_ref - ui16_hall_60_ref_old;
+
+                #ifdef HALL_DEBUG
+                    if (ui8_hall_sensors_state_last != 0x03)
+                        ui8_hall_seq_errors++;
+                #endif
             } else
                 switch (ui8_temp) {
                     case 0x02:
@@ -270,28 +289,56 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                         ui8_hall_counter_offset = ui8_hall_counter_offsets[1];
                         // calculate hall ticks between the last two Hall transitions (for Hall calibration)
                         ui16_hall_calib_cnt[1] = ui16_b - ui16_hall_60_ref_old;
+
+                        #ifdef HALL_DEBUG
+                            if (ui8_hall_sensors_state_last != 0x06)
+                                ui8_hall_seq_errors++;
+                        #endif
                         break;
                     case 0x03:
                         ui8_motor_phase_absolute_angle = ui8_hall_ref_angles[2]; // Rotor at 150 deg
                         ui8_hall_counter_offset = ui8_hall_counter_offsets[2];
                         ui16_hall_calib_cnt[2] = ui16_b - ui16_hall_60_ref_old;
+
+                        #ifdef HALL_DEBUG
+                            if (ui8_hall_sensors_state_last != 0x02)
+                                ui8_hall_seq_errors++;
+                        #endif
                         break;
                     case 0x04:
                         ui8_motor_phase_absolute_angle = ui8_hall_ref_angles[5]; // Rotor at 330 deg
                         ui8_hall_counter_offset = ui8_hall_counter_offsets[5];
                         ui16_hall_calib_cnt[5] = ui16_b - ui16_hall_60_ref_old;
+
+                        #ifdef HALL_DEBUG
+                            if (ui8_hall_sensors_state_last != 0x05)
+                                ui8_hall_seq_errors++;
+                        #endif
                         break;
                     case 0x05:
                         ui8_motor_phase_absolute_angle = ui8_hall_ref_angles[4]; // Rotor at 270 deg
                         ui8_hall_counter_offset = ui8_hall_counter_offsets[4];
                         ui16_hall_calib_cnt[4] = ui16_b - ui16_hall_60_ref_old;
+
+                        #ifdef HALL_DEBUG
+                            if (ui8_hall_sensors_state_last != 0x01)
+                                ui8_hall_seq_errors++;
+                        #endif
                         break;
                     case 0x06:
                         ui8_motor_phase_absolute_angle = ui8_hall_ref_angles[0]; // Rotor at 30 deg
                         ui8_hall_counter_offset = ui8_hall_counter_offsets[0];
                         ui16_hall_calib_cnt[0] = ui16_b - ui16_hall_60_ref_old;
+
+                        #ifdef HALL_DEBUG
+                            if (ui8_hall_sensors_state_last != 0x04)
+                                ui8_hall_seq_errors++;
+                        #endif
                         break;
                     default:
+                        #ifdef HALL_DEBUG
+                            ui8_hall_val_errors++;
+                        #endif
                         return;
                 }
 
@@ -330,11 +377,11 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             // Faster implementation of the above operation based on the following assumptions:
             // 1) ui16_a < 8192 (only 13 of 16 significants bits)
             // 2) LSB of (ui16_a << 8) is obviously 0x00
-            // 3) The result to should be less than 64 (90 degrees)
-            uint8_t ui8_cnt = 6; //max 6 loops: result < 64
+            // 3) The result to should be less than 60 degrees. Use 180 deg (value of 128) to be safe.
+            uint8_t ui8_cnt = 7; //max 6 loops: result < 128
             // Add Field Weakening counter offset (fw angle increases with rotor speed)
             // ui16_a - ui16_b = Hall counter ticks from the last Hall sensor transition;
-            ui16_a = ((uint8_t)(ui8_fw_hall_counter_offset + ui8_hall_counter_offset) + (ui16_a - ui16_b)) << 2;
+            ui16_a = ((uint8_t)(ui8_fw_hall_counter_offset + ui8_hall_counter_offset) + (ui16_a - ui16_b)) << 1;
 
             do {
                 ui16_a <<= 1;
@@ -361,8 +408,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             addw    x, _ui16_a+0
             subw    x, _ui16_b+0
             sllw x
-            sllw x
-            mov _ui16_b+0, #6
+            mov _ui16_b+0, #7
         00012$:
             sllw x
             sll  _ui8_temp+0
@@ -426,18 +472,16 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             jra 00021$
         00020$:             // } else {
             // ui16_a = (uint16_t)((uint8_t)(MIDDLE_SVM_TABLE - ui8_temp) * (uint8_t)ui8_g_duty_cycle);
-            ld  _ui16_a+1, a
-            ld  a, #MIDDLE_SVM_TABLE
-            sub a, _ui16_a+1
+            sub a, #MIDDLE_SVM_TABLE
+            neg a
             ld  xl, a
             ld  a, _ui8_g_duty_cycle+0
             mul x, a
             // ui16_a = (uint8_t)(MIDDLE_PWM_COUNTER - (uint8_t) (ui16_a >> 8)) << 1;
             ld  a, xh
-            ld  _ui16_a+1, a
-            ld  a, #MIDDLE_PWM_COUNTER
+            sub a, #MIDDLE_PWM_COUNTER
             clr _ui16_a+0
-            sub a, _ui16_a+1
+            neg a
             jrpl 00023$
             mov _ui16_a+0, #0x01
         00023$:
@@ -480,18 +524,16 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             jra 00025$
         00024$:             // } else {
             // ui16_b = (uint16_t)((uint8_t)(MIDDLE_SVM_TABLE - ui8_temp) * (uint8_t)ui8_g_duty_cycle);
-            ld  _ui16_b+1, a
-            ld  a, #MIDDLE_SVM_TABLE
-            sub a, _ui16_b+1
+            sub a, #MIDDLE_SVM_TABLE
+            neg a
             ld  xl, a
             ld  a, _ui8_g_duty_cycle+0
             mul x, a
             // ui16_b = (uint8_t)(MIDDLE_PWM_COUNTER - (uint8_t) (ui16_b >> 8)) << 1;
             ld  a, xh
-            ld  _ui16_b+1, a
-            ld  a, #MIDDLE_PWM_COUNTER
+            sub a, #MIDDLE_PWM_COUNTER
             clr _ui16_b+0
-            sub a, _ui16_b+1
+            neg a
             jrpl 00027$
             mov _ui16_b+0, #0x01
         00027$:
@@ -535,18 +577,16 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             jra 00029$
         00028$:             // } else {
             // ui16_c = (uint16_t)((uint8_t)(MIDDLE_SVM_TABLE - ui8_temp) * (uint8_t)ui8_g_duty_cycle);
-            ld  _ui16_c+1, a
-            ld  a, #MIDDLE_SVM_TABLE
-            sub a, _ui16_c+1
+            sub a, #MIDDLE_SVM_TABLE
+            neg a
             ld  xl, a
             ld  a, _ui8_g_duty_cycle+0
             mul x, a
             // ui16_c = (uint8_t)(MIDDLE_PWM_COUNTER - (uint8_t) (ui16_c >> 8)) << 1;
             ld  a, xh
-            ld  _ui16_c+1, a
-            ld  a, #MIDDLE_PWM_COUNTER
+            sub a, #MIDDLE_PWM_COUNTER
             clr _ui16_c+0
-            sub a, _ui16_c+1
+            neg a
             jrpl 00031$
             mov _ui16_c+0, #0x01
         00031$:
@@ -604,10 +644,12 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         /********************* *******************************************************/
         /*
         // Read battery current
-        // Left alignment: Read MSB first then read LSB !
-        ui8_temp = ADC1->DB5RH;
-        ui8_temp <<= 2;
-        ui8_temp |= ADC1->DB5RL
+        // Right alignment: Buffered values doesn't have locking mecanism !
+        // enshure read is done after the end of conversion !
+        ui16_adc_voltage  = (*(uint16_t*)(0x53EC))
+        ui16_adc_torque   = (*(uint16_t*)(0x53E8))
+        ui16_adc_throttle = (*(uint16_t*)(0x53EE))
+        ui8_temp = ADC1->DB5RL
         ui8_adc_battery_current_acc >>= 1;
         ui8_adc_battery_current_filtered >>= 1;
         ui8_adc_battery_current_acc = (uint8_t)(ui8_temp >> 1) + ui8_adc_battery_current_acc;
@@ -624,10 +666,13 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         */
         #ifndef __CDT_PARSER__ // avoid Eclipse syntax check
         __asm
-        ld  a, 0x53EA                               // ui8_temp = ADC1->DB5RH;
-        sll a                                       // ui8_temp <<= 2;
-        sll a
-        or  a, 0x53EB                               // ui8_temp |= ADC1->DB5RL;
+        ldw x, 0x53EC
+        ldw _ui16_adc_voltage, x
+        ldw x, 0x53E8
+        ldw _ui16_adc_torque, x
+        ldw x, 0x53EE
+        ldw _ui16_adc_throttle, x
+        ld  a, 0x53EB                               // ui8_temp |= ADC1->DB5RL;
         srl _ui8_adc_battery_current_acc+0          // ui8_adc_battery_current_acc >>= 1;
         srl a                                       // ui8_adc_battery_current_acc = (uint8_t)(ui8_temp >> 1) + ui8_adc_battery_current_acc;
         add a, _ui8_adc_battery_current_acc+0
@@ -662,7 +707,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         // - check if brakes are engaged
 
         // check if coaster brake is engaged
-        if (UI8_ADC_TORQUE_SENSOR < ui8_adc_coaster_brake_threshold) {
+        if (ui16_adc_torque < ui16_adc_coaster_brake_threshold) {
             // set brake state
             ui8_brake_state = 1;
         } else {
@@ -678,13 +723,13 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         // - limit motor max phase current
         // - limit motor max ERPS
         // - ramp up/down PWM duty_cycle and/or field weakening angle value
-		
+
         // check if to decrease, increase or maintain duty cycle
         if ((ui8_g_duty_cycle > ui8_controller_duty_cycle_target)
                 || (ui8_adc_battery_current_filtered > ui8_controller_adc_battery_current_target)
                 || (ui8_adc_motor_phase_current > ui8_adc_motor_phase_current_max)
                 || (ui16_hall_counter_total < (HALL_COUNTER_FREQ / MOTOR_OVER_SPEED_ERPS))
-                || (UI8_ADC_BATTERY_VOLTAGE < ui8_adc_battery_voltage_cut_off)
+                || (ui16_adc_voltage < ui16_adc_voltage_cut_off)
                 || (ui8_brake_state)) {
             // reset duty cycle ramp up counter (filter)
             ui8_counter_duty_cycle_ramp_up = 0;
@@ -861,8 +906,6 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             ++ui16_cadence_calc_counter;
         }
 
-
-
         #ifdef MAIN_TIME_DEBUG
             ui8_main_time++;
         #endif
@@ -929,7 +972,7 @@ void read_battery_voltage(void) {
     // low pass filter the voltage readed value, to avoid possible fast spikes/noise
     ui16_adc_battery_voltage_accumulated -= ui16_adc_battery_voltage_accumulated
             >> READ_BATTERY_VOLTAGE_FILTER_COEFFICIENT;
-    ui16_adc_battery_voltage_accumulated += (uint16_t)(UI16_ADC_10_BIT_BATTERY_VOLTAGE);
+    ui16_adc_battery_voltage_accumulated += ui16_adc_voltage;
     ui16_adc_battery_voltage_filtered = ui16_adc_battery_voltage_accumulated >> READ_BATTERY_VOLTAGE_FILTER_COEFFICIENT;
 }
 
@@ -1005,17 +1048,9 @@ void calc_foc_angle(void) {
 
 // calc asin also converts the final result to degrees
 uint8_t asin_table(uint8_t ui8_inverted_angle_x128) {
-    uint8_t ui8_index = 0;
-
-    while (ui8_index < SIN_TABLE_LEN) {
-        if (ui8_inverted_angle_x128 < ui8_sin_table[ui8_index])
-            break;
-
-        ui8_index++;
-    }
-
-    // first value of table is 0 so ui8_index will always increment to at least 1 and return 0
-    return ui8_index;
+    if (ui8_inverted_angle_x128 > ASIN_TABLE_MAX)
+        return 59;
+    return ui8_asin_table[ui8_inverted_angle_x128];
 }
 
 void motor_enable_pwm(void) {

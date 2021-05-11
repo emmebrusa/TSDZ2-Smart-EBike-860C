@@ -1,7 +1,7 @@
 /*
  * TongSheng TSDZ2 motor controller firmware/
  *
- * Copyright (C) Casainho, Leon, MSpider65 2020.
+ * Copyright (C) Casainho, Leon, MSpider65 2021.
  *
  * Released under the GPL License, Version 3
  */
@@ -9,11 +9,11 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-//#define DEBUG_UART
 //#define PWM_TIME_DEBUG
 //#define MAIN_TIME_DEBUG
+//#define HALL_DEBUG
 
-#define FW_VERSION 12
+#define FW_VERSION 13
 
 /*---------------------------------------------------------
  NOTE: regarding motor rotor offset
@@ -31,31 +31,15 @@
 #define PHASE_ROTOR_ANGLE_270 (uint8_t)((uint8_t)192 + MOTOR_ROTOR_OFFSET_ANGLE - (uint8_t)64)
 #define PHASE_ROTOR_ANGLE_330 (uint8_t)((uint8_t)235 + MOTOR_ROTOR_OFFSET_ANGLE - (uint8_t)64)
 
-// PWM related values
-// motor
-#define PWM_CYCLES_SECOND                                       19047U // 52us (PWM period)
 #define HALL_COUNTER_FREQ                                       250000U // 250KHz or 4us
-#define HALL_COUNTER_INTERP_MAX                                 4166 // (HALL_COUNTER_FREQ/MOTOR_ROTOR_INTERPOLATION_MIN_ERPS/6)
-// ramp up/down PWM cycles count
-#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_CADENCE_OFFSET      50     // PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP offset for cadence assist mode
-#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT             195    // (should be less than 255-50->205) 160 -> 160 * 64 us for every duty cycle increment at 15.625KHz
-#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN                 24     // 20 -> 20 * 64 us for every duty cycle increment at 15.625KHz
-#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_STARTUP             60     // Initial RAMP UP at motor startup
-#define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_DEFAULT           49     // 40 -> 40 * 64 us for every duty cycle decrement at 15.625KHz
-#define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_MIN               10     // 8 -> 8 * 64 us for every duty cycle decrement at 15.625KHz
-#define MOTOR_OVER_SPEED_ERPS                                   650    // motor max speed | 30 points for the sinewave at max speed (less than PWM_CYCLES_SECOND/30)
-#define CRUISE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP                  98    // 80 at 15.625KHz
-#define WALK_ASSIST_DUTY_CYCLE_RAMP_UP_INVERSE_STEP             244    // 200 at 15.625KHz
-#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT        98    // 80 at 15.625KHz
-#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN            49     // 40 at 15.625KHz
-// cadence
-#define CADENCE_SENSOR_CALC_COUNTER_MIN                         4266  // 3500 at 15.625KHz
-#define CADENCE_SENSOR_TICKS_COUNTER_MIN_AT_SPEED               341  // 280 at 15.625KHz
-#define CADENCE_TICKS_STARTUP                                   7618  // ui16_cadence_sensor_ticks value for startup. About 7-8 RPM (6250 at 15.625KHz)
-#define CADENCE_SENSOR_STANDARD_MODE_SCHMITT_TRIGGER_THRESHOLD  426   // software based Schmitt trigger to stop motor jitter when at resolution limits (350 at 15.625KHz)
-// Wheel speed sensor
-#define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MAX                    165   // (135 at 15,625KHz) something like 200 m/h with a 6'' wheel
-#define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MIN                    39976 // could be a bigger number but will make for a slow detection of stopped wheel speed
+
+// ----------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------
+// PWM related values
+
+// motor
+#define PWM_COUNTER_MAX                                         444     // 16MHz / 888 = 18,018 KHz
+#define PWM_CYCLES_SECOND                                       (16000000/(PWM_COUNTER_MAX*2)) // 55.5us (PWM period)
 
 /*---------------------------------------------------------
  NOTE: regarding duty cycle (PWM) ramping
@@ -67,47 +51,67 @@
  low values for acceleration.
  ---------------------------------------------------------*/
 
-#define PWM_DUTY_CYCLE_MAX                                        254
-#define MIDDLE_SVM_TABLE                                          106
-#define MIDDLE_PWM_COUNTER                                        105
-#define PWM_DUTY_CYCLE_STARTUP                                    30    // Initial PWM Duty Cycle at motor startup
-	
-//#define MOTOR_ROTOR_ERPS_START_INTERPOLATION_60_DEGREES           10
+// ramp up/down PWM cycles count
+#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_CADENCE_OFFSET      60     // PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP offset for cadence assist mode
+#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT             (uint8_t)(PWM_CYCLES_SECOND/98) // (should be less than 255-50->205) 160 -> 160 * 64 us for every duty cycle increment at 15.625KHz
+#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN                 (uint8_t)(PWM_CYCLES_SECOND/781)     // 20 -> 20 * 64 us for every duty cycle increment at 15.625KHz
+#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_STARTUP             60     // Initial RAMP UP at motor startup
+#define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_DEFAULT           (uint8_t)(PWM_CYCLES_SECOND/390)     // 40 -> 40 * 64 us for every duty cycle decrement at 15.625KHz
+#define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_MIN               (uint8_t)(PWM_CYCLES_SECOND/1953)      // 8 -> 8 * 64 us for every duty cycle decrement at 15.625KHz
+#define CRUISE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP                  (uint8_t)(PWM_CYCLES_SECOND/195)     // 80 at 15.625KHz
+#define WALK_ASSIST_DUTY_CYCLE_RAMP_UP_INVERSE_STEP             (uint8_t)(PWM_CYCLES_SECOND/78)    // 200 at 15.625KHz
+#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT        (uint8_t)(PWM_CYCLES_SECOND/195)     // 80 at 15.625KHz
+#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN            (uint8_t)(PWM_CYCLES_SECOND/390)     // 40 at 15.625KHz
+
+#define MOTOR_OVER_SPEED_ERPS                                   ((PWM_CYCLES_SECOND/29) < 650 ?  (PWM_CYCLES_SECOND/29) : 650) // motor max speed | 29 points for the sinewave at max speed (less than PWM_CYCLES_SECOND/29)
+
+// cadence
+#define CADENCE_SENSOR_CALC_COUNTER_MIN                         (uint16_t)((uint32_t)PWM_CYCLES_SECOND*100U/446U)  // 3500 at 15.625KHz
+#define CADENCE_SENSOR_TICKS_COUNTER_MIN_AT_SPEED               (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/558U)   // 280 at 15.625KHz
+#define CADENCE_TICKS_STARTUP                                   (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/25U)  // ui16_cadence_sensor_ticks value for startup. About 7-8 RPM (6250 at 15.625KHz)
+#define CADENCE_SENSOR_STANDARD_MODE_SCHMITT_TRIGGER_THRESHOLD  (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/446U)   // software based Schmitt trigger to stop motor jitter when at resolution limits (350 at 15.625KHz)
+
+// Wheel speed sensor
+#define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MAX                    (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/1157U)   // (135 at 15,625KHz) something like 200 m/h with a 6'' wheel
+#define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MIN                    (uint16_t)((uint32_t)PWM_CYCLES_SECOND*1000U/477U) // 32767@15625KHz could be a bigger number but will make for a slow detection of stopped wheel speed
+
+
+#define MIDDLE_SVM_TABLE                                        107
+#define MIDDLE_PWM_COUNTER                                      107
+
+#define PWM_DUTY_CYCLE_MAX                                      254
+#define PWM_DUTY_CYCLE_STARTUP                                  30    // Initial PWM Duty Cycle at motor startup
+
+// ----------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------
 
 /* Hall Sensors NOTE! - results after Hall sensor calibration experiment
-Dai calcoli risulta che Trise - Tfall = 20 e cioè 80 us (1 Hall counter step e' 4us).
-Quindi Trise è molto più lungo di Tfall. Quindi le transizioni del sensore Hall vengono rilevate
-con un ritardo diverso in funzione della transizione del segnale. Quindi gli stati 6,3,5 (fronte di
-salita) vengono rilevati con un ritardo di 80us (o 20 step) maggiore rispetto agli stati 2,1,4.
-Quindi negli stati 6,3,5 va sommato 20 (20x4us=80us) al contatore Hall usato per l'interpolazione,
-visto che è partito con 80us di ritardo rispetto agli altri stati. In questo modo
-il contatore Hall sarà allineato allo stesso modo per tutti gli stati, ma sarà comunque in ritardo
-di Tfall per tutti gli stati. Questo ritardo fisso viene gestito con un offset fisso da sommare
-al contatore. Questo spiega la necessità dell'offset fisso che si è reso necessario fino ad ora.
-Visto che il valore attuale dell'offset fisso è 18, si deve sommare 28 (20+8) agli stati 6,3,5
-e 8 agli stati 2,1,4 poichè (28+8)/2=18. Di questo 8 (8x4=32us), 6,5 (6,56*4=26,25us) servono a
-compensare il ritardo fisso fra la lettura del contatore Hall e l'applicazione delle fasi che
-avviene con un ritardo fisso pari a mezzo ciclo PWM (1/19047 = 52,5us, 52,5/2=26,25us).
-Purtroppo non c'è modo di calcolare i valori assoluti di Trise e Tfall utilizzando i contatori
-Hall ma solo la differenza fra i due valori.
-In realtà sarebbe possibile misurando con precisionea la corrente a diverse velocità prestabilite
-del motore. Mantenedo fissa la velocità si fa variare il duty cycle, e l'offset del contatore hall
-e si trova il valore di offset per cui la corrente assorbita è minima per una data velocita.
-Facendo alcune rilevazioni e poi una regressione lineare, sarebbe poi possibile ottenere quali sono
-gli offset del contatore Hall e del'angolo della phase ottimali da applicare.
-Il problema è che la misura di corrente fornita dal controller è troppo grossolana e si dovrebbe
-usare uno strumento di precisione.
+Dai test sulla calibrazione dei sensori Hall risulta che Trise - Tfall = 21 e cioè 84 us
+(1 Hall counter step = 4us).
+Quindi gli stati 6,3,5 (fronte di salita) vengono rilevati con un ritardo di 84us maggiore
+rispetto agli stati 2,1,4.
+Quindi per gli stati 6,3,5 va sommato 21 (21x4us=84us) al contatore Hall usato per l'interpolazione,
+visto che è partito con 84us di ritardo rispetto agli altri stati.
+In questo modo il contatore Hall viene allineato allo stesso modo per tutti gli stati, ma sarà
+comunque in ritardo di Tfall per tutti gli stati. Questo ritardo viene gestito con un ulteriore
+offset da sommare al contatore per tutti gli stati.
+Dai test effettuati risulta che Tfall vale circa 66us (16,5 step) a cui va sommato il ritardo fra							   
+la lettura del contatore Hall e la scrittura dei registri PWM che è sempre uguale a mezzo
+ciclo PWM (1/(19047*2) = 26,25us o 6,5 step).
+Quindi l'offset per gli stati 2,1,4 vale 23 (16,5+6,5) mentre per gli stati 6,3,5
+vale 44 (16,5+6,5+21).
+I test effettuati hanno inoltre calcolato che il riferimento angolare corretto non è 10 ma 4 step
 ***************************************
 Test effettuato il 21/1/2012
-MOTOR_ROTOR_OFFSET_ANGLE:  10 - 6 -> 4
-HALL_COUNTER_OFFSET_DOWN:  8 + 15 -> 23
-HALL_COUNTER_OFFSET_UP:   28 + 15 -> 43
+MOTOR_ROTOR_OFFSET_ANGLE:  10 -> 4
+HALL_COUNTER_OFFSET_DOWN:  8  -> 23
+HALL_COUNTER_OFFSET_UP:    29 -> 44
 ****************************************
 */
 
-#define HALL_COUNTER_OFFSET_UP                  44
-#define HALL_COUNTER_OFFSET_DOWN                23
-#define FW_HALL_COUNTER_OFFSET_MAX              6
+#define HALL_COUNTER_OFFSET_DOWN                (HALL_COUNTER_FREQ/PWM_CYCLES_SECOND/2 + 17)
+#define HALL_COUNTER_OFFSET_UP                  (HALL_COUNTER_OFFSET_DOWN + 21)
+#define FW_HALL_COUNTER_OFFSET_MAX              6 // 6*4=24us max time offset
 
 
 #define MOTOR_ROTOR_INTERPOLATION_MIN_ERPS      10
@@ -130,7 +134,9 @@ HALL_COUNTER_OFFSET_UP:   28 + 15 -> 43
  interpolation 60 degrees. Must be found experimentally
  but a value of 25 may be good.
  ---------------------------------------------------------*/
+
 #define ADC_10_BIT_BATTERY_CURRENT_MAX                            137	// 22 amps
+
 #define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        187	// 30 amps
 //#define ADC_10_BIT_BATTERY_CURRENT_MAX                            106	// 17 amps
 //#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        177	// 28 amps
