@@ -1,3 +1,14 @@
+TSDZ2 Open Source Firmware v20.1C.3 for 860C display
+
+  1 - Updated to v13 version of mspider65 (but with 19KHz PWM frequency)
+  2 - Improved motor efficiency with high power (by mspider65)
+Changed files
+  main.h
+  ebike_app.c
+  ebike_app.h
+  motor.c
+  motor.h
+
 TSDZ2 Open Source Firmware v20.1C.2 for 860C display
 
   1 - Updated to v12 version of mspider65 (Hall sensor calibration missing)

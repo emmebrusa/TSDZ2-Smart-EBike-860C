@@ -24,6 +24,7 @@
 #define SVM_TABLE_LEN   256
 #define ASIN_TABLE_MAX  127
 
+// svm table 19 Khz
 static const uint8_t ui8_svm_table[SVM_TABLE_LEN] = { 202, 203, 205, 206, 207, 208, 209, 210, 211, 211, 212, 213, 213,
         214, 214, 214, 215, 215, 215, 215, 215, 215, 215, 215, 214, 214, 214, 213, 213, 212, 211, 211, 210, 209, 208,
         208, 207, 206, 205, 204, 202, 201, 199, 195, 191, 187, 183, 178, 174, 170, 165, 161, 157, 152, 148, 143, 139,
@@ -35,6 +36,21 @@ static const uint8_t ui8_svm_table[SVM_TABLE_LEN] = { 202, 203, 205, 206, 207, 2
         178, 183, 187, 191, 195, 199, 201, 202, 204, 205, 206, 207, 208, 208, 209, 210, 211, 211, 212, 213, 213, 214,
         214, 214, 215, 215, 215, 215, 215, 215, 215, 215, 214, 214, 214, 213, 213, 212, 211, 211, 210, 209, 208, 207,
         206, 205, 203, 202, 201 };
+
+/*
+// svm table 18 Khz
+static const uint8_t ui8_svm_table[SVM_TABLE_LEN] = { 208, 209, 210, 212, 213, 214, 215, 216, 217, 217, 218, 219, 219,
+        220, 220, 220, 221, 221, 221, 221, 221, 221, 221, 221, 220, 220, 220, 219, 219, 218, 217, 217, 216, 215, 214,
+        213, 212, 211, 210, 209, 208, 207, 205, 201, 196, 192, 188, 183, 179, 174, 170, 165, 161, 156, 152, 147, 143,
+        138, 134, 129, 124, 120, 115, 111, 106, 101, 97, 92, 87, 83, 78, 74, 69, 65, 60, 56, 51, 47, 42, 38, 33, 29, 25,
+        20, 16, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4,
+        4, 5, 6, 7, 8, 9, 11, 12, 13, 15, 13, 12, 11, 9, 8, 7, 6, 5, 4, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 1, 2, 2, 3, 4, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 20, 25, 29, 33, 38, 42, 47, 51, 56, 60, 65, 69, 74,
+        78, 83, 87, 92, 97, 101, 106, 111, 115, 120, 124, 129, 134, 138, 143, 147, 152, 156, 161, 165, 170, 174, 179,
+        183, 188, 192, 196, 201, 205, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 217, 218, 219, 219, 220,
+        220, 220, 221, 221, 221, 221, 221, 221, 221, 221, 220, 220, 220, 219, 219, 218, 217, 217, 216, 215, 214, 213,
+        212, 210, 209, 208, 206 };
+*/
 
 static const uint8_t ui8_asin_table[128] = { 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7,
         8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15, 16, 16, 16, 17, 17,
@@ -64,7 +80,6 @@ volatile uint8_t ui8_controller_duty_cycle_target = 0;
 volatile uint8_t ui8_g_foc_angle = 0;
 // Field Weakening Hall offset (added during interpolation)
 volatile uint8_t ui8_fw_hall_counter_offset = 0;
-volatile uint8_t ui8_g_field_weakening_enable = 0;
 
 static uint8_t ui8_counter_duty_cycle_ramp_up = 0;
 static uint8_t ui8_counter_duty_cycle_ramp_down = 0;
@@ -707,7 +722,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         // - check if brakes are engaged
 
         // check if coaster brake is engaged
-        if (ui16_adc_torque < ui16_adc_coaster_brake_threshold) {
+        if(ui16_adc_torque < ui16_adc_coaster_brake_threshold) {
             // set brake state
             ui8_brake_state = 1;
         } else {
@@ -730,7 +745,8 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                 || (ui8_adc_motor_phase_current > ui8_adc_motor_phase_current_max)
                 || (ui16_hall_counter_total < (HALL_COUNTER_FREQ / MOTOR_OVER_SPEED_ERPS))
                 || (ui16_adc_voltage < ui16_adc_voltage_cut_off)
-                || (ui8_brake_state)) {
+                || (ui8_brake_state)
+				|| (!ui8_assist_level)) {
             // reset duty cycle ramp up counter (filter)
             ui8_counter_duty_cycle_ramp_up = 0;
 			
@@ -761,7 +777,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                     ui8_g_duty_cycle++;
                 }
             }
-        } else if ((ui8_g_duty_cycle == PWM_DUTY_CYCLE_MAX) && (ui8_g_field_weakening_enable)
+        } else if ((ui8_g_duty_cycle == PWM_DUTY_CYCLE_MAX) && (ui8_field_weakening_enabled)
                 && (ui8_adc_battery_current_filtered < ui8_controller_adc_battery_current_target)) {
             // reset duty cycle ramp down counter (filter)
             ui8_counter_duty_cycle_ramp_down = 0;
@@ -1038,6 +1054,11 @@ void calc_foc_angle(void) {
 
     // calc FOC angle
     ui8_g_foc_angle = asin_table(ui16_iwl_128 / ui16_e_phase_voltage);
+
+	uint8_t ui8_tmp = ui8_adc_battery_current_filtered / (uint8_t)13U;
+	if (ui8_tmp > 5)
+		ui8_tmp = 5;
+	ui8_g_foc_angle += ui8_tmp;
 
     skip_foc:
     // low pass filter FOC angle

@@ -72,7 +72,7 @@ volatile struct_configuration_variables m_configuration_variables = {
         };
 
 // system
-static uint8_t ui8_assist_level = 0;
+uint8_t ui8_assist_level = 0;
 static uint8_t ui8_riding_mode = OFF_MODE;
 static uint8_t ui8_riding_mode_parameter = 0;
 static uint8_t ui8_walk_assist_parameter = 0;
@@ -81,8 +81,9 @@ static uint8_t ui8_motor_enabled = 1;
 static uint8_t ui8_assist_without_pedal_rotation_threshold = 0;
 static uint8_t ui8_assist_without_pedal_rotation_enabled = 0;
 static uint8_t ui8_lights_configuration = 0;
-static uint8_t ui8_lights_state = 0;
 static uint8_t ui8_assist_whit_error_enabled = 0;
+uint8_t ui8_lights_state = 0;
+uint8_t ui8_field_weakening_enabled = 0;
 
 // power control
 static uint8_t ui8_battery_current_max = DEFAULT_VALUE_BATTERY_CURRENT_MAX;
@@ -100,7 +101,7 @@ volatile uint8_t ui8_adc_motor_phase_current_max = ADC_10_BIT_MOTOR_PHASE_CURREN
 // cadence sensor
 uint16_t ui16_cadence_ticks_count_min_speed_adj = CADENCE_SENSOR_CALC_COUNTER_MIN;
 static uint8_t ui8_pedal_cadence_RPM = 0;
-volatile uint8_t ui8_pedal_cadence_fast_stop = 0;
+uint8_t ui8_pedal_cadence_fast_stop = 0;
 
 // torque sensor
 static uint16_t ui16_adc_pedal_torque_offset = ADC_TORQUE_SENSOR_OFFSET_DEFAULT;
@@ -1748,9 +1749,14 @@ void UART2_RX_IRQHandler(void) __interrupt(UART2_RX_IRQHANDLER)
 					break;
  
 				case 1:
-					ui8_rx_buffer[1] = ui8_byte_received;
-					ui8_rx_len = ui8_byte_received;
-					ui8_state_machine = 2;
+					if(ui8_byte_received > (UART_NUMBER_DATA_BYTES_TO_RECEIVE - 2)) {
+						ui8_state_machine = 0;
+					}
+					else {
+						ui8_rx_buffer[1] = ui8_byte_received;
+						ui8_rx_len = ui8_byte_received;
+						ui8_state_machine = 2;
+					}
 					break;
 
 				case 2:
@@ -2073,7 +2079,7 @@ static void communications_process_packages(uint8_t ui8_frame_type)
 		ui8_assist_without_pedal_rotation_enabled = (ui8_rx_buffer[8] & 32) >> 5;
       
 		// motor type
-		ui8_temp = (ui8_rx_buffer[8] >> 6) & 1;
+		ui8_temp = (ui8_rx_buffer[8] & 64) >> 6;
 
 		//m_configuration_variables.ui8_motor_inductance_x1048576
 		// motor inductance & cruise pid parameter
@@ -2151,7 +2157,7 @@ static void communications_process_packages(uint8_t ui8_frame_type)
 
 		ui8_temp = ui8_rx_buffer[80];
 		ui8_pedal_cadence_fast_stop = ui8_temp & 1;
-		ui8_g_field_weakening_enable = (ui8_temp & 2) >> 1;
+		ui8_field_weakening_enabled = (ui8_temp & 2) >> 1;
 		ui8_coaster_brake_enabled = (ui8_temp & 4) >> 2;
 		//m_config_vars.ui8_motor_current_control_mode = (ui8_temp & 8) >> 3;
 		// (ui8_temp & 16) >> 4; available 

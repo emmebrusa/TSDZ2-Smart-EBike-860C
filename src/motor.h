@@ -32,8 +32,6 @@ extern volatile uint8_t ui8_hall_ref_angles[6];
 extern volatile uint8_t ui8_hall_counter_offsets[6];
 extern volatile uint8_t ui8_hall_sensors_state;
 
-extern volatile uint8_t ui8_g_field_weakening_enable;
-
 // motor erps
 extern volatile uint16_t ui16_motor_speed_erps;
 

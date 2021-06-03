@@ -38,7 +38,8 @@
 // PWM related values
 
 // motor
-#define PWM_COUNTER_MAX                                         444     // 16MHz / 888 = 18,018 KHz
+//#define PWM_COUNTER_MAX                                         444     // 16MHz / 888 = 18,018 KHz
+#define PWM_COUNTER_MAX                                         420     // 16MHz / 840 = 19,047 KHz
 #define PWM_CYCLES_SECOND                                       (16000000/(PWM_COUNTER_MAX*2)) // 55.5us (PWM period)
 
 /*---------------------------------------------------------
@@ -75,9 +76,14 @@
 #define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MAX                    (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/1157U)   // (135 at 15,625KHz) something like 200 m/h with a 6'' wheel
 #define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MIN                    (uint16_t)((uint32_t)PWM_CYCLES_SECOND*1000U/477U) // 32767@15625KHz could be a bigger number but will make for a slow detection of stopped wheel speed
 
-
-#define MIDDLE_SVM_TABLE                                        107
-#define MIDDLE_PWM_COUNTER                                      107
+// svm table 19 Khz
+#define MIDDLE_SVM_TABLE                                          107
+#define MIDDLE_PWM_COUNTER                                        107
+/*
+// svm table 18 Khz
+#define MIDDLE_SVM_TABLE                                        110
+#define MIDDLE_PWM_COUNTER                                      110
+*/
 
 #define PWM_DUTY_CYCLE_MAX                                      254
 #define PWM_DUTY_CYCLE_STARTUP                                  30    // Initial PWM Duty Cycle at motor startup
