@@ -1,3 +1,11 @@
+TSDZ2 Open Source Firmware v20.1C.3-NEW for 860C display
+
+  1 - Added "Startup assist", to start from a standstill on impossible climbs.
+  2 - Improved cadence assist mode.
+  3 - Added new features on the display.
+Changed files
+  ebike_app.c
+
 TSDZ2 Open Source Firmware v20.1C.3 for 860C display
 
   1 - Updated to v13 version of mspider65 (but with 19KHz PWM frequency)
