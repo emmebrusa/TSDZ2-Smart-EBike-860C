@@ -18,7 +18,7 @@
 #include "pwm.h"
 #include "adc.h"
 #include "uart.h"
-#include "adc.h"
+//#include "adc.h"
 #include "common.h"
 
 #define SVM_TABLE_LEN   256
@@ -73,6 +73,7 @@ volatile uint8_t ui8_controller_duty_cycle_ramp_up_inverse_step = PWM_DUTY_CYCLE
 volatile uint8_t ui8_controller_duty_cycle_ramp_down_inverse_step = PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_DEFAULT;
 volatile uint16_t ui16_adc_battery_voltage_filtered = 0;
 volatile uint16_t ui16_adc_voltage_cut_off = 0xfff;
+volatile uint16_t ui16_adc_voltage_shutdown = 0;
 volatile uint8_t ui8_adc_battery_current_filtered = 0;
 volatile uint8_t ui8_controller_adc_battery_current_target = 0;
 volatile uint8_t ui8_g_duty_cycle = 0;
@@ -99,7 +100,7 @@ volatile uint8_t ui8_brake_state = 0;
 // cadence sensor
 #define NO_PAS_REF 5
 volatile uint16_t ui16_cadence_sensor_ticks = 0;
-volatile uint32_t ui32_crank_revolutions_x20 = 0;
+//volatile uint32_t ui32_crank_revolutions_x20 = 0;
 static uint16_t ui16_cadence_sensor_ticks_counter_min = CADENCE_SENSOR_CALC_COUNTER_MIN;
 static uint8_t ui8_pas_state_old = 4;
 static uint16_t ui16_cadence_calc_counter, ui16_cadence_stop_counter;
@@ -111,6 +112,11 @@ volatile uint16_t ui16_wheel_speed_sensor_ticks = 0;
 volatile uint16_t ui16_wheel_speed_sensor_ticks_counter_min = 0;
 volatile uint32_t ui32_wheel_speed_sensor_ticks_total = 0;
 
+// ebike loop check
+volatile uint16_t ui16_ebike_check_counter = 0;
+#define EBIKE_CHECK_COUNTER_THRESHOLD	1000
+
+// system functions
 void read_battery_voltage(void);
 void calc_foc_angle(void);
 uint8_t asin_table(uint8_t ui8_inverted_angle_x128);
@@ -241,9 +247,14 @@ static uint16_t ui16_c;
 
 static uint8_t ui8_temp;
 
-
 void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 {
+	// disable pwm at shutdown
+	if(ui16_adc_voltage < ui16_adc_voltage_shutdown) {
+		ui8_motor_enabled = 0;
+		motor_disable_pwm();
+	}
+	
     // bit 5 of TIM1->CR1 contains counter direction (0=up, 1=down)
     if (TIM1->CR1 & 0x10) {
         #ifndef __CDT_PARSER__ // disable Eclipse syntax check
@@ -392,7 +403,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             // Faster implementation of the above operation based on the following assumptions:
             // 1) ui16_a < 8192 (only 13 of 16 significants bits)
             // 2) LSB of (ui16_a << 8) is obviously 0x00
-            // 3) The result to should be less than 60 degrees. Use 180 deg (value of 128) to be safe.
+            // 3) The result should be less than 60 degrees. Use 180 deg (value of 128) to be safe.
             uint8_t ui8_cnt = 7; //max 6 loops: result < 128
             // Add Field Weakening counter offset (fw angle increases with rotor speed)
             // ui16_a - ui16_b = Hall counter ticks from the last Hall sensor transition;
@@ -699,12 +710,12 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 
         tnz _ui8_g_duty_cycle+0                     // if (ui8_g_duty_cycle > 0)
         jreq 00051$
-        clrw    x          // ui8_adc_motor_phase_current = (ui8_adc_battery_current_filtered << 6)) / ui8_g_duty_cycle;
+        clrw x          // ui8_adc_motor_phase_current = (ui8_adc_battery_current_filtered << 6)) / ui8_g_duty_cycle;
         ld  xh, a
         srlw    x
         srlw    x
         ld  a, _ui8_g_duty_cycle+0
-        div    x, a
+        div x, a
         ld  a, xl
         ld  _ui8_adc_motor_phase_current+0, a
         jra 00052$
@@ -729,8 +740,15 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             // set brake state
             ui8_brake_state = ((BRAKE__PORT->IDR & BRAKE__PIN) ^ BRAKE__PIN);
         }
-
-
+		
+		/**************************************************************************/
+		
+		// ebike loop check
+		if(ui16_ebike_check_counter > EBIKE_CHECK_COUNTER_THRESHOLD)
+			ui8_brake_state = 1;
+		else
+			ui16_ebike_check_counter++;
+		
         /****************************************************************************/
         // PWM duty_cycle controller:
         // - limit battery undervolt
@@ -747,6 +765,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                 || (ui16_adc_voltage < ui16_adc_voltage_cut_off)
                 || (ui8_brake_state)
 				|| (!ui8_assist_level)) {
+				
             // reset duty cycle ramp up counter (filter)
             ui8_counter_duty_cycle_ramp_up = 0;
 			
@@ -777,7 +796,9 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                     ui8_g_duty_cycle++;
                 }
             }
-        } else if ((ui8_g_duty_cycle == PWM_DUTY_CYCLE_MAX) && (ui8_field_weakening_enabled)
+        } else if ((ui8_field_weakening_enabled)
+				&& (ui8_g_duty_cycle == PWM_DUTY_CYCLE_MAX)
+				&& (ui16_motor_speed_erps > MOTOR_SPEED_FIELD_WEAKEANING_MIN) // do not enable at low motor speed / low cadence
                 && (ui8_adc_battery_current_filtered < ui8_controller_adc_battery_current_target)) {
             // reset duty cycle ramp down counter (filter)
             ui8_counter_duty_cycle_ramp_down = 0;
@@ -794,7 +815,6 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             ui8_counter_duty_cycle_ramp_up = 0;
             ui8_counter_duty_cycle_ramp_down = 0;
         }
-
 
 
         /****************************************************************************/
@@ -887,8 +907,8 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 			}
 			
             // Reference state for crank revolution counter increment
-            if (ui8_temp == 0)
-                ui32_crank_revolutions_x20++;
+            //if (ui8_temp == 0)
+            //    ui32_crank_revolutions_x20++;
 
             if (ui8_temp == ui8_cadence_calc_ref_state) {
                 // ui16_cadence_calc_counter is valid for cadence calculation

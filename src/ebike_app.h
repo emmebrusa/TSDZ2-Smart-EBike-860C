@@ -12,6 +12,13 @@
 #include <stdint.h>
 #include "main.h"
 
+// startup boost mode
+#define CADENCE						0
+#define SPEED						1
+
+// torque sensor offset calibrated
+//extern volatile uint16_t ui16_adc_pedal_torque_offset_cal;
+
 // cadence sensor
 extern uint16_t ui16_cadence_ticks_count_min_speed_adj;
 extern uint8_t ui8_pedal_cadence_fast_stop;
@@ -24,6 +31,12 @@ extern uint16_t ui16_adc_coaster_brake_threshold;
 
 // ADC motor phase current max
 extern volatile uint8_t ui8_adc_motor_phase_current_max;
+
+// ADC battery current target
+//extern volatile uint8_t ui8_adc_battery_current_target;
+
+// Motor enabled
+extern volatile uint8_t ui8_motor_enabled;
 
 typedef struct _configuration_variables {
     uint16_t ui16_battery_low_voltage_cut_off_x10;

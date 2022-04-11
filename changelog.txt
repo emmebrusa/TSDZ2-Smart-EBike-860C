@@ -1,6 +1,29 @@
+TSDZ2 Open Source Firmware v20.1C.4 for 860C display
+
+  1 - Improved torque sensor calibration.
+  2 - Added adjustment of the adc offset of the pedal torque.
+  3 - Added adjustment of the adc range of the pedal torque.
+  4 - Added adjustment of the adc angle of the pedal torque.
+  5 - Added choice Startup boost mode, at zero cadence or at zero speed.
+  6 - Added "Walk Assist" speed settings, one for each level.
+  7 - Improved progressivity in "Cadence Assist" mode.
+  8 - Added choice of soc % calculation mode.
+  9 - Added voltage calibration to display.
+ 10 - Modified standing start, softer.
+ 11 - Fixed an overflow issue in power assist mode.
+ 12 - Fix of the calculation of human power.
+ 13 - Changed "dead time" value to 2.0 us.
+Changed files
+  main.h
+  ebike_app.c
+  ebike_app.h
+  motor.c
+  motor.h
+  pwm.c
+
 TSDZ2 Open Source Firmware v20.1C.3-NEW for 860C display
 
-  1 - Added "Startup assist", to start from a standstill on impossible climbs.
+  1 - Added "Startup assist", to start from a standstill on difficult climbs.
   2 - Improved cadence assist mode.
   3 - Added new features on the display.
 Changed files
