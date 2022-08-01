@@ -1,3 +1,16 @@
+TSDZ2 Open Source Firmware v20.1C.4 update 1 for 860C display
+
+  1 - Fixed "Startup assist" feature.
+  2 - Assist without pedaling, can also be activated with torque offset < 20.
+  3 - Disabled error E08 speed sensor failure, in Walk assist mode.
+  4 - Fixed "BRAKE" status message problem.
+  5 - Fixed problem with setting the odometer in miles.
+Changed files
+  main.h
+  ebike_app.c
+  motor.c
+  motor.h
+
 TSDZ2 Open Source Firmware v20.1C.4 for 860C display
 
   1 - Improved torque sensor calibration.

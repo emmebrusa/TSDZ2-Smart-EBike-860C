@@ -18,7 +18,6 @@
 #include "pwm.h"
 #include "adc.h"
 #include "uart.h"
-//#include "adc.h"
 #include "common.h"
 
 #define SVM_TABLE_LEN   256
@@ -87,7 +86,7 @@ static uint8_t ui8_counter_duty_cycle_ramp_down = 0;
 
 // battery current variables
 static uint8_t ui8_adc_battery_current_acc = 0;
-static uint8_t ui8_adc_motor_phase_current;
+volatile uint8_t ui8_adc_motor_phase_current;
 
 // ADC Values
 volatile uint16_t ui16_adc_voltage;
@@ -725,8 +724,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         mov 0x5400+0, #0x07                     // ADC1->CSR = 0x07;
         __endasm;
         #endif
-
-
+		
         /****************************************************************************/
         // brake state (used also in ebike_app loop)
         // - check if coaster brake is engaged
@@ -738,7 +736,8 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             ui8_brake_state = 1;
         } else {
             // set brake state
-            ui8_brake_state = ((BRAKE__PORT->IDR & BRAKE__PIN) ^ BRAKE__PIN);
+            //ui8_brake_state = ((BRAKE__PORT->IDR & BRAKE__PIN) ^ BRAKE__PIN);
+			ui8_brake_state = ((BRAKE__PORT->IDR & (uint8_t)BRAKE__PIN) == 0);
         }
 		
 		/**************************************************************************/
@@ -766,7 +765,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                 || (ui8_brake_state)
 				|| (!ui8_assist_level)) {
 				
-            // reset duty cycle ramp up counter (filter)
+			// reset duty cycle ramp up counter (filter)
             ui8_counter_duty_cycle_ramp_up = 0;
 			
 			// motor fast stop

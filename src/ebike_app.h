@@ -16,9 +16,6 @@
 #define CADENCE						0
 #define SPEED						1
 
-// torque sensor offset calibrated
-//extern volatile uint16_t ui16_adc_pedal_torque_offset_cal;
-
 // cadence sensor
 extern uint16_t ui16_cadence_ticks_count_min_speed_adj;
 extern uint8_t ui8_pedal_cadence_fast_stop;

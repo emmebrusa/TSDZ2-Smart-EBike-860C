@@ -22,6 +22,7 @@ extern volatile uint16_t ui16_adc_battery_voltage_filtered;
 extern volatile uint16_t ui16_adc_voltage_cut_off;
 extern volatile uint16_t ui16_adc_voltage_shutdown;
 extern volatile uint8_t ui8_adc_battery_current_filtered;
+extern volatile uint8_t ui8_adc_motor_phase_current;
 extern volatile uint8_t ui8_controller_adc_battery_current_target;
 extern volatile uint8_t ui8_g_duty_cycle;
 extern volatile uint8_t ui8_fw_hall_counter_offset;
