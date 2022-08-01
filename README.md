@@ -2,7 +2,7 @@ This repository is updated by mbrusa.
 
 TSDZ2 Open Source Firmware v20.1C
 
-This fork is based on the v0.20beta1 and TSDZ2-ESP32 v7 by mspider65 and v1.1.0 by casainho for Color LCD 860C
+This fork is based on the v0.20beta1 and TSDZ2-ESP32 di mspider65 e v1.1.0 di casainho per LCD a colori 860C
 
 See the [wiki] for instructions
 
