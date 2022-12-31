@@ -21,7 +21,7 @@ extern uint16_t ui16_cadence_ticks_count_min_speed_adj;
 extern uint8_t ui8_pedal_cadence_fast_stop;
 extern uint8_t ui8_lights_state;
 extern uint8_t ui8_field_weakening_enabled;
-extern uint8_t ui8_assist_level;
+extern uint8_t ui8_assist_level_flag;
 
 // Torque sensor coaster brake engaged threshold value
 extern uint16_t ui16_adc_coaster_brake_threshold;
