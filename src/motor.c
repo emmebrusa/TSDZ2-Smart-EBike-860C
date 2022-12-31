@@ -763,7 +763,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                 || (ui16_hall_counter_total < (HALL_COUNTER_FREQ / MOTOR_OVER_SPEED_ERPS))
                 || (ui16_adc_voltage < ui16_adc_voltage_cut_off)
                 || (ui8_brake_state)
-				|| (!ui8_assist_level_flag)) {
+				|| (!ui8_assist_level)) {
 				
 			// reset duty cycle ramp up counter (filter)
             ui8_counter_duty_cycle_ramp_up = 0;

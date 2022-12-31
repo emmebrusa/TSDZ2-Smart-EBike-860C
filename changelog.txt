@@ -1,14 +1,5 @@
-TSDZ2 Open Source Firmware v20.1C.4 update 2 for 860C display
-  1 - Improved Walk assist speed adjustment.
-  2 - Added legal throttle, only works when pedaling, in street mode.
-  3 - Added legal cruise, only works when pedaling, in street mode.
-  4 - Added full battery charge cycles counter.
-  5 - Added distance and hour counters, for maintenance warning.
-Changed files
-  main.h
-  ebike_app.c
-
 TSDZ2 Open Source Firmware v20.1C.4 update 1 for 860C display
+
   1 - Fixed "Startup assist" feature.
   2 - Assist without pedaling, can also be activated with torque offset < 20.
   3 - Disabled error E08 speed sensor failure, in Walk assist mode.
@@ -21,6 +12,7 @@ Changed files
   motor.h
 
 TSDZ2 Open Source Firmware v20.1C.4 for 860C display
+
   1 - Improved torque sensor calibration.
   2 - Added adjustment of the adc offset of the pedal torque.
   3 - Added adjustment of the adc range of the pedal torque.
@@ -43,6 +35,7 @@ Changed files
   pwm.c
 
 TSDZ2 Open Source Firmware v20.1C.3-NEW for 860C display
+
   1 - Added "Startup assist", to start from a standstill on difficult climbs.
   2 - Improved cadence assist mode.
   3 - Added new features on the display.
@@ -50,6 +43,7 @@ Changed files
   ebike_app.c
 
 TSDZ2 Open Source Firmware v20.1C.3 for 860C display
+
   1 - Updated to v13 version of mspider65 (but with 19KHz PWM frequency)
   2 - Improved motor efficiency with high power (by mspider65)
 Changed files
@@ -60,6 +54,7 @@ Changed files
   motor.h
 
 TSDZ2 Open Source Firmware v20.1C.2 for 860C display
+
   1 - Updated to v12 version of mspider65 (Hall sensor calibration missing)
   2 - Improved the problem of delay in restarting with bike in motion (from mspider65 v12)
   3 - Improved standing start response.
@@ -96,6 +91,7 @@ Added file
 
 
 TSDZ2 Open Source Firmware v20.1C.1 for 860C display
+
   1 - temperature problem fixed.
   2 - Torque sensor error threshold changed (E02).
 Changed files
@@ -103,6 +99,7 @@ Changed files
 
 
 TSDZ2 Open Source Firmware v20.1C for 860C display
+
 Motor changes
   1 - Added field weakening function to increase the motor speed (by mspider65).
   2 - Added other optimizations to motor control, torque sensor and cadence sensor (by mspider65).
