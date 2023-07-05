@@ -1,3 +1,19 @@
+TSDZ2 Open Source Firmware v20.1C.4 update 3 for 860C display
+  1 - Anti-tampering measure.
+      Added password to parameters regarding speed limit, motor power, use of throttle and cruise.
+  2 - Startup assist. Added speed limit to 6 km/h.
+  3 - Choice of temperature sensor, LM35 or TMP36.
+  4 - Choice of brake input, brake sensors or on/off thermostat (NO max 85°C).
+  5 - Choosing how to use the throttle.
+  6 - Choosing how to use the cruise.
+  7 - Added motor overcurrent check (by mspider65), e7 Overcurrent error.
+  8 - Added throttle input check on power up, e5 Throttle fault.
+Changed files
+  main.h
+  ebike_app.c
+  ebike_app.h
+  motor.c
+
 TSDZ2 Open Source Firmware v20.1C.4 update 2 for 860C display
   1 - Improved Walk assist speed adjustment.
   2 - Added legal throttle, only works when pedaling, in street mode.

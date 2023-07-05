@@ -57,11 +57,11 @@
 #define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_CADENCE_OFFSET      (uint8_t)(PWM_CYCLES_SECOND/260) // PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP offset for cadence assist mode
 #define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT             (uint8_t)(PWM_CYCLES_SECOND/98) // (should be less than 255-50->205) 160 -> 160 * 64 us for every duty cycle increment at 15.625KHz
 #define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN                 (uint8_t)(PWM_CYCLES_SECOND/781) // 20 -> 20 * 64 us for every duty cycle increment at 15.625KHz
-#define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_DEFAULT           (uint8_t)(PWM_CYCLES_SECOND/390) // 40 -> 40 * 64 us for every duty cycle decrement at 15.625KHz
+#define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_DEFAULT           (uint8_t)(PWM_CYCLES_SECOND/260) // 60 -> 60 * 64 us for every duty cycle decrement at 15.625KHz
 #define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_MIN               (uint8_t)(PWM_CYCLES_SECOND/1953) // 8 -> 8 * 64 us for every duty cycle decrement at 15.625KHz
-#define CRUISE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP                  (uint8_t)(PWM_CYCLES_SECOND/195) // 80 at 15.625KHz
+#define CRUISE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP                  (uint8_t)(PWM_CYCLES_SECOND/130) // 120 at 15.625KHz
 #define WALK_ASSIST_DUTY_CYCLE_RAMP_UP_INVERSE_STEP             (uint8_t)(PWM_CYCLES_SECOND/78) // 200 at 15.625KHz
-#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT        (uint8_t)(PWM_CYCLES_SECOND/195) // 80 at 15.625KHz
+#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT        (uint8_t)(PWM_CYCLES_SECOND/78) // 200 at 15.625KHz
 #define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN            (uint8_t)(PWM_CYCLES_SECOND/390) // 40 at 15.625KHz
 
 #define MOTOR_OVER_SPEED_ERPS                                   ((PWM_CYCLES_SECOND/29) < 650 ?  (PWM_CYCLES_SECOND/29) : 650) // motor max speed | 29 points for the sinewave at max speed (less than PWM_CYCLES_SECOND/29)
@@ -144,10 +144,12 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
  but a value of 25 may be good.
  ---------------------------------------------------------*/
 
-#define ADC_10_BIT_BATTERY_CURRENT_MAX                            112	// 18 amps
-#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        187	// 30 amps
-//#define ADC_10_BIT_BATTERY_CURRENT_MAX                            106	// 17 amps
-//#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX                        177	// 28 amps
+#define ADC_10_BIT_BATTERY_OVERCURRENT						150 // 24 amps
+#define ADC_10_BIT_BATTERY_EXTRACURRENT						38  //  6 amps
+#define ADC_10_BIT_BATTERY_CURRENT_MAX						112	// 18 amps
+#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX					187	// 30 amps
+//#define ADC_10_BIT_BATTERY_CURRENT_MAX					106	// 17 amps
+//#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX				177	// 28 amps
 
 /*---------------------------------------------------------
  NOTE: regarding ADC battery current max

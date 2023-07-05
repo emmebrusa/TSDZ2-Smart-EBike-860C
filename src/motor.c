@@ -710,9 +710,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         tnz _ui8_g_duty_cycle+0                     // if (ui8_g_duty_cycle > 0)
         jreq 00051$
         clrw x          // ui8_adc_motor_phase_current = (ui8_adc_battery_current_filtered << 6)) / ui8_g_duty_cycle;
-        ld  xh, a
-        srlw    x
-        srlw    x
+        ld  xh, a		// ui8_adc_battery_current_filtered
         ld  a, _ui8_g_duty_cycle+0
         div x, a
         ld  a, xl
@@ -798,7 +796,8 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         } else if ((ui8_field_weakening_enabled)
 				&& (ui8_g_duty_cycle == PWM_DUTY_CYCLE_MAX)
 				&& (ui16_motor_speed_erps > MOTOR_SPEED_FIELD_WEAKEANING_MIN) // do not enable at low motor speed / low cadence
-                && (ui8_adc_battery_current_filtered < ui8_controller_adc_battery_current_target)) {
+                && (ui8_adc_battery_current_filtered < ui8_controller_adc_battery_current_target)
+				&& (!ui8_adc_throttle_assist)) {
             // reset duty cycle ramp down counter (filter)
             ui8_counter_duty_cycle_ramp_down = 0;
 
@@ -1020,9 +1019,6 @@ void calc_foc_angle(void) {
     uint32_t ui32_w_angular_velocity_x16;
     uint16_t ui16_iwl_128;
 
-    struct_configuration_variables *p_configuration_variables;
-    p_configuration_variables = get_configuration_variables();
-
     // FOC implementation by calculating the angle between phase current and rotor magnetic flux (BEMF)
     // 1. phase voltage is calculate
     // 2. I*w*L is calculated, where I is the phase current. L was a measured value for 48V motor.
@@ -1048,16 +1044,6 @@ void calc_foc_angle(void) {
     ui32_w_angular_velocity_x16 = (uint32_t)ui16_motor_speed_erps * 101U;
 
     // ---------------------------------------------------------------------------------------------------------------------
-    // NOTE: EXPERIMENTAL and may not be good for the brushless motor inside TSDZ2
-    // Original message from jbalat on 28.08.2018, about increasing the limits on 36 V motor -- please see that this seems to go over the recomended values
-    // The ui32_l_x1048576 = 105 is working well so give that a try if you have a 36 V motor.
-    // This is the minimum value that gives me 550 W of power when I have asked for 550 W at level 5 assist, > 36 km/hr
-    //
-    // Remember also to boost the max motor erps in main.h to get higher cadence
-    // #define MOTOR_OVER_SPEED_ERPS 700 // motor max speed, protection max value | 30 points for the sinewave at max speed
-    // ---------------------------------------------------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------------------------------------------------
     // 36 V motor: L = 76uH
     // 48 V motor: L = 135uH
     // ui32_l_x1048576 = 142; // 1048576 = 2^20 | 48V
@@ -1066,7 +1052,7 @@ void calc_foc_angle(void) {
     // ui32_l_x1048576 = 142 <--- THIS VALUE WAS verified experimentaly on 2018.07 to be near the best value for a 48V motor
     // Test done with a fixed mechanical load, duty_cycle = 200 and 100 and measured battery current was 16 and 6 (10 and 4 amps)
     // ---------------------------------------------------------------------------------------------------------------------
-    ui16_l_x1048576 = p_configuration_variables->ui8_motor_inductance_x1048576;
+    ui16_l_x1048576 = ui8_motor_inductance_x1048576;
 
     // calc IwL
     ui16_iwl_128 = ((uint32_t)((uint32_t)ui16_i_phase_current_x2 * ui16_l_x1048576) * ui32_w_angular_velocity_x16 ) >> 18;
