@@ -9,11 +9,10 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-//#define PWM_TIME_DEBUG
-//#define MAIN_TIME_DEBUG
+//#define TIME_DEBUG
 //#define HALL_DEBUG
 
-#define FW_VERSION 13 // mspider65
+//#define FW_VERSION 15 // mspider65
 
 /*---------------------------------------------------------
  NOTE: regarding motor rotor offset
@@ -37,11 +36,20 @@
 // ----------------------------------------------------------------------------------------------------------------
 // PWM related values
 
-// motor
-//#define PWM_COUNTER_MAX                                         444     // 16MHz / 888 = 18,018 KHz
-#define PWM_COUNTER_MAX                                         420     // 16MHz / 840 = 19,047 KHz
+//#define PWM_FREQ												18 // 18 Khz
+#define PWM_FREQ												19 // 19 Khz
 
-#define PWM_CYCLES_SECOND                                       (16000000/(PWM_COUNTER_MAX*2)) // 55.5us (PWM period)
+#if PWM_FREQ == 19
+#define PWM_COUNTER_MAX                                         420 // 16MHz / 840 = 19,047 KHz                                        107
+#define MIDDLE_SVM_TABLE										107 // svm table 19 Khz
+#define MIDDLE_PWM_COUNTER										107
+#else
+#define PWM_COUNTER_MAX                                         444 // 16MHz / 888 = 18,018 KHz                                    110
+#define MIDDLE_SVM_TABLE                                        110 // svm table 18 Khz
+#define MIDDLE_PWM_COUNTER                                      110
+#endif
+
+#define PWM_CYCLES_SECOND                                       (16000000/(PWM_COUNTER_MAX*2)) // 55.5us (PWM period) 18 Khz
 
 /*---------------------------------------------------------
  NOTE: regarding duty cycle (PWM) ramping
@@ -54,18 +62,17 @@
  ---------------------------------------------------------*/
 
 // ramp up/down PWM cycles count
-#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_CADENCE_OFFSET      (uint8_t)(PWM_CYCLES_SECOND/260) // PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP offset for cadence assist mode
-#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT             (uint8_t)(PWM_CYCLES_SECOND/98) // (should be less than 255-50->205) 160 -> 160 * 64 us for every duty cycle increment at 15.625KHz
-#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN                 (uint8_t)(PWM_CYCLES_SECOND/781) // 20 -> 20 * 64 us for every duty cycle increment at 15.625KHz
-#define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_DEFAULT           (uint8_t)(PWM_CYCLES_SECOND/260) // 60 -> 60 * 64 us for every duty cycle decrement at 15.625KHz
-#define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_MIN               (uint8_t)(PWM_CYCLES_SECOND/1953) // 8 -> 8 * 64 us for every duty cycle decrement at 15.625KHz
-#define CRUISE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP                  (uint8_t)(PWM_CYCLES_SECOND/130) // 120 at 15.625KHz
-#define WALK_ASSIST_DUTY_CYCLE_RAMP_UP_INVERSE_STEP             (uint8_t)(PWM_CYCLES_SECOND/78) // 200 at 15.625KHz
-#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT        (uint8_t)(PWM_CYCLES_SECOND/78) // 200 at 15.625KHz
-#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN            (uint8_t)(PWM_CYCLES_SECOND/390) // 40 at 15.625KHz
+#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT             (uint8_t)(PWM_CYCLES_SECOND/98)
+#define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN                 (uint8_t)(PWM_CYCLES_SECOND/781)
+#define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_DEFAULT           (uint8_t)(PWM_CYCLES_SECOND/260)
+#define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_MIN               (uint8_t)(PWM_CYCLES_SECOND/1953)
+#define CRUISE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP                  (uint8_t)(PWM_CYCLES_SECOND/78)
+#define WALK_ASSIST_DUTY_CYCLE_RAMP_UP_INVERSE_STEP             (uint8_t)(PWM_CYCLES_SECOND/78)
+#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT        (uint8_t)(PWM_CYCLES_SECOND/78)
+#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN            (uint8_t)(PWM_CYCLES_SECOND/390)
 
 #define MOTOR_OVER_SPEED_ERPS                                   ((PWM_CYCLES_SECOND/29) < 650 ?  (PWM_CYCLES_SECOND/29) : 650) // motor max speed | 29 points for the sinewave at max speed (less than PWM_CYCLES_SECOND/29)
-#define MOTOR_SPEED_FIELD_WEAKEANING_MIN          				300
+#define MOTOR_SPEED_FIELD_WEAKEANING_MIN          				400
 
 // cadence
 #define CADENCE_SENSOR_CALC_COUNTER_MIN                         (uint16_t)((uint32_t)PWM_CYCLES_SECOND*100U/446U)  // 3500 at 15.625KHz
@@ -76,15 +83,6 @@
 // Wheel speed sensor
 #define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MAX                    (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/1157U)   // (135 at 15,625KHz) something like 200 m/h with a 6'' wheel
 #define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MIN                    (uint16_t)((uint32_t)PWM_CYCLES_SECOND*1000U/477U) // 32767@15625KHz could be a bigger number but will make for a slow detection of stopped wheel speed
-
-// svm table 19 Khz
-#define MIDDLE_SVM_TABLE                                          107
-#define MIDDLE_PWM_COUNTER                                        107
-/*
-// svm table 18 Khz
-#define MIDDLE_SVM_TABLE                                        110
-#define MIDDLE_PWM_COUNTER                                      110
-*/
 
 #define PWM_DUTY_CYCLE_MAX										254
 #define PWM_DUTY_CYCLE_STARTUP									30    // Initial PWM Duty Cycle at motor startup
@@ -109,7 +107,7 @@ Quindi l'offset per gli stati 2,1,4 vale 23 (16,5+6,5) mentre per gli stati 6,3,
 vale 44 (16,5+6,5+21).
 I test effettuati hanno inoltre calcolato che il riferimento angolare corretto non è 10 ma 4 step
 ***************************************
-Test effettuato il 21/1/2012
+Test effettuato il 21/1/2021
 MOTOR_ROTOR_OFFSET_ANGLE:  10 -> 4
 HALL_COUNTER_OFFSET_DOWN:  8  -> 23
 HALL_COUNTER_OFFSET_UP:    29 -> 44
@@ -122,6 +120,10 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
 
 #define MOTOR_ROTOR_INTERPOLATION_MIN_ERPS      10
 
+// set on the display
+#define FOC_ANGLE_MULTIPLIER					30 // 36 volt motor
+//#define FOC_ANGLE_MULTIPLIER					39 // 48 volt motor
+
 // adc torque offset gap value for error
 #define ADC_TORQUE_SENSOR_OFFSET_THRESHOLD		30
 
@@ -133,23 +135,18 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
 #define ADC_TORQUE_SENSOR_ANGLE_COEFF			11
 #define ADC_TORQUE_SENSOR_ANGLE_COEFF_X10		(uint8_t)(ADC_TORQUE_SENSOR_ANGLE_COEFF * 10)
 // scale the torque assist target current
-#define TORQUE_ASSIST_FACTOR_DENOMINATOR		110
+#define TORQUE_ASSIST_FACTOR_DENOMINATOR		120
 
-/*---------------------------------------------------------
- NOTE: regarding motor start interpolation
+// smooth start ramp
+#define SMOOTH_START_RAMP_DEFAULT				165 // 35% (255=0% long ramp)
+#define SMOOTH_START_RAMP_MIN					30
 
- This value is the ERPS speed after which a transition
- happens from sinewave and no interpolation to
- interpolation 60 degrees. Must be found experimentally
- but a value of 25 may be good.
- ---------------------------------------------------------*/
-
-#define ADC_10_BIT_BATTERY_OVERCURRENT						150 // 24 amps
+// adc current
 #define ADC_10_BIT_BATTERY_EXTRACURRENT						38  //  6 amps
-#define ADC_10_BIT_BATTERY_CURRENT_MAX						112	// 18 amps
-#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX					187	// 30 amps
-//#define ADC_10_BIT_BATTERY_CURRENT_MAX					106	// 17 amps
-//#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX				177	// 28 amps
+#define ADC_10_BIT_BATTERY_CURRENT_MAX						112	// 18 amps // 1 = 0.16 Amp
+//#define ADC_10_BIT_BATTERY_CURRENT_MAX						124	// 20 amps // 1 = 0.16 Amp
+//#define ADC_10_BIT_BATTERY_CURRENT_MAX						136	// 22 amps // 1 = 0.16 Amp
+#define ADC_10_BIT_MOTOR_PHASE_CURRENT_MAX					187	// 30 amps // 1 = 0.16 Amp
 
 /*---------------------------------------------------------
  NOTE: regarding ADC battery current max

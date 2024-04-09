@@ -18,26 +18,17 @@
 
 // cadence sensor
 extern uint16_t ui16_cadence_ticks_count_min_speed_adj;
-extern uint8_t ui8_pedal_cadence_fast_stop;
-extern uint8_t ui8_lights_state;
-extern uint8_t ui8_field_weakening_enabled;
-extern uint8_t ui8_assist_level_flag;
 
 // Torque sensor coaster brake engaged threshold value
 extern uint16_t ui16_adc_coaster_brake_threshold;
+extern uint8_t ui8_coaster_brake_enabled;
 
 // ADC motor phase current max
 extern volatile uint8_t ui8_adc_motor_phase_current_max;
 
-// ADC battery current target
-//extern volatile uint8_t ui8_adc_battery_current_target;
+// Motor ERPS
+extern uint16_t ui16_motor_speed_erps;
 
-// Motor
-extern uint8_t ui8_motor_inductance_x1048576; 
-extern volatile uint8_t ui8_motor_enabled;
-
-// Throttle
-extern uint8_t ui8_adc_throttle_assist;
 
 void ebike_app_controller(void);
 

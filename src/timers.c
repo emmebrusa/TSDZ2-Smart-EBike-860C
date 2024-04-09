@@ -19,7 +19,7 @@ void timer2_init(void);
 void timer3_init(void);
 void timer4_init(void);
 
-void timers_init() {
+void timers_init(void) {
     timer2_init();
     timer3_init();
     timer4_init();

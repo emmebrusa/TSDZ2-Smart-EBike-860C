@@ -1,3 +1,26 @@
+TSDZ2 Open Source Firmware v20.1C.5 for 860C display
+  1 - Updated to v15 version of mspider65 (optimized FOC angle calculation)
+  2 - Added "Smooth start" feature for Hybrid and Torque mode.
+  3 - Progressive assist in eMtb mode, based on torque or power.
+  4 - Levels set the current target in Cadence Assist mode.
+  5 - Optimized PID parameters in Cruise mode.
+  6 - Fixed temperature limits with TMP36 sensor.
+  7 - Enabling Coaster Brake disables Walk Assist, Startup Assist, Throttle, Cruise (safety).
+  8 - Fixed other small bugs.
+  9 - Added missing menu items to SW102.
+ 10 - Support new display 860C V1.3 (January 2024).
+
+TSDZ2 Open Source Firmware v20.1C.4 update 4 for 860C display
+  1 - Support new display 860C V1.2 April 2023 (by SykloFR).
+  2 - Auto on/off lights with the display's light sensor (860c only).
+  3 - Fixed (maybe) crash in configuration menus navigation.
+  4 - Fixed stuck cursor in configuration menus.
+  5 - Fixed ERPS motor graph.
+  6 - Fixed fahrenheit conversion in Temperature graph.
+  7 - Fixed speed field display problem.
+  8 - Modified display/motor compatibility check.
+  9 - Copied from casainho version the solution of other bugs.
+
 TSDZ2 Open Source Firmware v20.1C.4 update 3 for 860C display
   1 - Anti-tampering measure.
       Added password to parameters regarding speed limit, motor power, use of throttle and cruise.
