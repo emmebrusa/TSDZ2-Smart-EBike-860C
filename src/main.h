@@ -120,9 +120,9 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
 
 #define MOTOR_ROTOR_INTERPOLATION_MIN_ERPS      10
 
-// set on the display
-#define FOC_ANGLE_MULTIPLIER					30 // 36 volt motor
-//#define FOC_ANGLE_MULTIPLIER					39 // 48 volt motor
+// set on the display with motor type
+#define FOC_ANGLE_MULTIPLIER_36V				30 // 36 volt motor
+#define FOC_ANGLE_MULTIPLIER_48V				39 // 48 volt motor
 
 // adc torque offset gap value for error
 #define ADC_TORQUE_SENSOR_OFFSET_THRESHOLD		30

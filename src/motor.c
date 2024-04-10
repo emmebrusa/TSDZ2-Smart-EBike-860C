@@ -77,7 +77,7 @@ static uint8_t ui8_counter_duty_cycle_ramp_down = 0;
 // FOC angle
 static uint8_t ui8_foc_angle_accumulated;
 static uint8_t ui8_foc_flag;
-uint8_t ui8_foc_angle_multiplicator = FOC_ANGLE_MULTIPLIER;
+uint8_t ui8_foc_angle_multiplicator = FOC_ANGLE_MULTIPLIER_36V;
 static uint8_t ui8_adc_foc_angle_current = 0;
 
 // battery current variables
