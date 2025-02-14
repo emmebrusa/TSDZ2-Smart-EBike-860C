@@ -72,19 +72,23 @@
 #define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN            (uint8_t)(PWM_CYCLES_SECOND/390)
 
 #define MOTOR_OVER_SPEED_ERPS                                   ((PWM_CYCLES_SECOND/29) < 650 ?  (PWM_CYCLES_SECOND/29) : 650) // motor max speed | 29 points for the sinewave at max speed (less than PWM_CYCLES_SECOND/29)
-#define MOTOR_SPEED_FIELD_WEAKEANING_MIN          				400
+#define MOTOR_SPEED_FIELD_WEAKENING_MIN							490 // 90 rpm
+#define ERPS_SPEED_OF_MOTOR_REENABLING							320 // 60 rpm
 
 // cadence
-#define CADENCE_SENSOR_CALC_COUNTER_MIN                         (uint16_t)((uint32_t)PWM_CYCLES_SECOND*100U/446U)  // 3500 at 15.625KHz
-#define CADENCE_SENSOR_TICKS_COUNTER_MIN_AT_SPEED               (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/558U)   // 280 at 15.625KHz
-#define CADENCE_TICKS_STARTUP                                   (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/25U)  // ui16_cadence_sensor_ticks value for startup. About 7-8 RPM (6250 at 15.625KHz)
-#define CADENCE_SENSOR_STANDARD_MODE_SCHMITT_TRIGGER_THRESHOLD  (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/446U)   // software based Schmitt trigger to stop motor jitter when at resolution limits (350 at 15.625KHz)
+#define CADENCE_SENSOR_CALC_COUNTER_MIN                         (uint16_t)((uint32_t)PWM_CYCLES_SECOND*100U/446U)	// 3500 at 15.625KHz
+#define CADENCE_SENSOR_TICKS_COUNTER_MIN_AT_SPEED               (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/558U)	// 280 at 15.625KHz
+#define CADENCE_TICKS_STARTUP                                   (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/25U)		// ui16_cadence_sensor_ticks value for startup. About 7-8 RPM (6250 at 15.625KHz)
+//#define CADENCE_SENSOR_STANDARD_MODE_SCHMITT_TRIGGER_THRESHOLD	(uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/446U)	// software based Schmitt trigger to stop motor jitter when at resolution limits (350 at 15.625KHz)
+#define CADENCE_SENSOR_STANDARD_MODE_SCHMITT_TRIGGER_THRESHOLD	(uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/892U)	// Quick stop value as version 4.4
 
 // Wheel speed sensor
 #define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MAX                    (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/1157U)   // (135 at 15,625KHz) something like 200 m/h with a 6'' wheel
 #define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MIN                    (uint16_t)((uint32_t)PWM_CYCLES_SECOND*1000U/477U) // 32767@15625KHz could be a bigger number but will make for a slow detection of stopped wheel speed
+#define WHEEL_SPEED_SENSOR_SIMULATION							0
 
-#define PWM_DUTY_CYCLE_MAX										254
+// duty cycle
+#define PWM_DUTY_CYCLE_MAX										255
 #define PWM_DUTY_CYCLE_STARTUP									30    // Initial PWM Duty Cycle at motor startup
 
 // ----------------------------------------------------------------------------------------------------------------
@@ -116,7 +120,7 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
 
 #define HALL_COUNTER_OFFSET_DOWN                (HALL_COUNTER_FREQ/PWM_CYCLES_SECOND/2 + 17)
 #define HALL_COUNTER_OFFSET_UP                  (HALL_COUNTER_OFFSET_DOWN + 21)
-#define FW_HALL_COUNTER_OFFSET_MAX              6 // 6*4=24us max time offset
+#define FW_HALL_COUNTER_OFFSET_MAX              5 // 5*4=20us max time offset
 
 #define MOTOR_ROTOR_INTERPOLATION_MIN_ERPS      10
 
@@ -142,7 +146,8 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
 #define SMOOTH_START_RAMP_MIN					30
 
 // adc current
-#define ADC_10_BIT_BATTERY_EXTRACURRENT						38  //  6 amps
+//#define ADC_10_BIT_BATTERY_EXTRACURRENT						38  //  6 amps
+#define ADC_10_BIT_BATTERY_EXTRACURRENT						50  //  8 amps
 #define ADC_10_BIT_BATTERY_CURRENT_MAX						112	// 18 amps // 1 = 0.16 Amp
 //#define ADC_10_BIT_BATTERY_CURRENT_MAX						124	// 20 amps // 1 = 0.16 Amp
 //#define ADC_10_BIT_BATTERY_CURRENT_MAX						136	// 22 amps // 1 = 0.16 Amp
@@ -200,11 +205,10 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
  ---------------------------------------------------------*/
 
 // ADC battery voltage measurement
-#define BATTERY_VOLTAGE_PER_10_BIT_ADC_STEP_X512                  44
 #define BATTERY_VOLTAGE_PER_10_BIT_ADC_STEP_X1000                 87  // conversion value verified with a cheap power meter
 
 // ADC battery voltage to be subtracted from the cut-off
-#define DIFFERENCE_CUT_OFF_SHUTDOWN_10_BIT						  100
+#define DIFFERENCE_CUT_OFF_SHUTDOWN_10_BIT						  100 // 9 Volts
 
 /*---------------------------------------------------------
  NOTE: regarding ADC battery voltage measurement
@@ -218,10 +222,10 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
  ---------------------------------------------------------*/
 
 // ADC battery current measurement
-#define BATTERY_CURRENT_PER_10_BIT_ADC_STEP_X512                  80
 #define BATTERY_CURRENT_PER_10_BIT_ADC_STEP_X100                  16  // 0.16A x 10 bit ADC step
 
 // walk assist
+#define WALK_ASSIST_WHEEL_SPEED_MIN_DETECT_X10	42
 #define WALK_ASSIST_ERPS_THRESHOLD				20
 #define WALK_ASSIST_ADJ_DELAY_MIN				4
 #define WALK_ASSIST_ADJ_DELAY_STARTUP			10

@@ -7,7 +7,6 @@
  */
 
 #include <stdint.h>
-#include <stdio.h>
 #include <math.h>
 #include "motor.h"
 #include "interrupts.h"
@@ -68,6 +67,7 @@ volatile uint8_t ui8_controller_duty_cycle_target = 0;
 volatile uint8_t ui8_g_foc_angle = 0;
 // Field Weakening Hall offset (added during interpolation)
 volatile uint8_t ui8_fw_hall_counter_offset = 0;
+volatile uint8_t ui8_fw_hall_counter_offset_max = 0;
 volatile uint8_t ui8_field_weakening_enabled = 0;
 
 // Duty cycle ramp up
@@ -77,7 +77,7 @@ static uint8_t ui8_counter_duty_cycle_ramp_down = 0;
 // FOC angle
 static uint8_t ui8_foc_angle_accumulated;
 static uint8_t ui8_foc_flag;
-uint8_t ui8_foc_angle_multiplicator = FOC_ANGLE_MULTIPLIER_36V;
+uint8_t ui8_foc_angle_multiplier = FOC_ANGLE_MULTIPLIER_36V;
 static uint8_t ui8_adc_foc_angle_current = 0;
 
 // battery current variables
@@ -553,7 +553,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         */
 
             ld a, _ui8_temp+0     // ui8_svm_table_index is stored in ui8_temp
-            add a, #0x55        // ui8_temp = ui8_svm_table[(uint8_t) (ui8_svm_table_index + 85 /* 120º */)];
+            add a, #0x55          // ui8_temp = ui8_svm_table[(uint8_t) (ui8_svm_table_index + 85 /* 120º */)];
             clrw x
             ld  xl, a
             ld  a, (_ui8_svm_table+0, x)
@@ -661,10 +661,10 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         if (ui8_g_duty_cycle > 0) {
             ui8_adc_motor_phase_current = (uint16_t)((uint16_t)((uint16_t)ui8_adc_battery_current_filtered << 8)) / ui8_g_duty_cycle;
             if (ui8_foc_flag) {
-                // ui8_foc_flag = (uint16_t)(ui8_adc_battery_current_filtered * ui8_foc_angle_multiplicator) / ui8_g_duty_cycle;
-                ui8_foc_flag = (uint16_t)(ui8_adc_motor_phase_current * ui8_foc_angle_multiplicator) / 256;
-                if (ui8_foc_flag > 15)
-                    ui8_foc_flag = 15;
+				ui8_adc_foc_angle_current = (ui8_adc_battery_current_filtered >> 1) + (ui8_adc_motor_phase_current >> 1);
+                ui8_foc_flag = (uint16_t)(ui8_adc_foc_angle_current * ui8_foc_angle_multiplier) / 256;
+                if (ui8_foc_flag > 13)
+                    ui8_foc_flag = 13;
                 ui8_foc_angle_accumulated = ui8_foc_angle_accumulated - (ui8_foc_angle_accumulated >> 4) + ui8_foc_flag;
                 ui8_g_foc_angle = ui8_foc_angle_accumulated >> 4;
                 ui8_foc_flag = 0;
@@ -716,11 +716,11 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 		
         tnz _ui8_foc_flag+0 // if (ui8_foc_flag)
         jreq 00052$
-        // ui8_foc_flag = (uint16_t)(ui8_adc_motor_phase_current * ui8_foc_angle_multiplicator) / 256;
+        // ui8_foc_flag = (uint16_t)(ui8_adc_foc_angle_current * ui8_foc_angle_multiplier) / 256;
 		ld  a, _ui8_adc_foc_angle_current+0
 		clrw x
 		ld  xl, a
-		ld  a, _ui8_foc_angle_multiplicator+0
+		ld  a, _ui8_foc_angle_multiplier+0
         mul x, a
         ld  a, xh
         ld  _ui8_foc_flag+0, a
@@ -744,7 +744,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         jra 00052$
     00051$:
         clr _ui8_adc_motor_phase_current+0      // ui8_adc_motor_phase_current = 0;
-        clr _ui8_adc_foc_angle_current+0			// ui8_adc_foc_angle_current = 0;
+        clr _ui8_adc_foc_angle_current+0		// ui8_adc_foc_angle_current = 0;
 		tnz _ui8_foc_flag+0   // if (ui8_foc_flag)
         jreq 00052$
         // ui8_foc_angle_accumulated = ui8_foc_angle_accumulated - (ui8_foc_angle_accumulated >> 4);
@@ -789,9 +789,9 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         // - ramp up/down PWM duty_cycle and/or field weakening angle value
 
         // check if to decrease, increase or maintain duty cycle
-        if ((ui8_g_duty_cycle > ui8_controller_duty_cycle_target)
-          || (ui8_adc_battery_current_filtered > ui8_controller_adc_battery_current_target)
-          || (ui8_adc_motor_phase_current > ui8_adc_motor_phase_current_max)
+        if ((ui8_controller_duty_cycle_target < ui8_g_duty_cycle)
+          || (ui8_controller_adc_battery_current_target < ui8_adc_battery_current_filtered)
+		  || (ui8_adc_motor_phase_current > ui8_adc_motor_phase_current_max)
           || (ui16_hall_counter_total < (HALL_COUNTER_FREQ / MOTOR_OVER_SPEED_ERPS))
           || (ui16_adc_voltage < ui16_adc_voltage_cut_off)
           || (ui8_brake_state)) {
@@ -811,8 +811,9 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 				}
             }
         }
-		else if (ui8_g_duty_cycle < ui8_controller_duty_cycle_target) {
-            // reset duty cycle ramp down counter (filter)
+		else if ((ui8_controller_duty_cycle_target > ui8_g_duty_cycle)
+          && (ui8_controller_adc_battery_current_target > ui8_adc_battery_current_filtered)) {
+			// reset duty cycle ramp down counter (filter)
             ui8_counter_duty_cycle_ramp_down = 0;
 
             // ramp up duty cycle
@@ -834,7 +835,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                ui8_counter_duty_cycle_ramp_up = 0;
 
                // increment field weakening angle
-               if (ui8_fw_hall_counter_offset < FW_HALL_COUNTER_OFFSET_MAX) {
+               if (ui8_fw_hall_counter_offset < ui8_fw_hall_counter_offset_max) {
                    ui8_fw_hall_counter_offset++;
 			   }
             }
@@ -892,7 +893,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 		}
 
         // increment and also limit the ticks counter
-        if (ui8_wheel_speed_sensor_ticks_counter_started)
+        if (ui8_wheel_speed_sensor_ticks_counter_started) {
             if (ui16_wheel_speed_sensor_ticks_counter < WHEEL_SPEED_SENSOR_TICKS_COUNTER_MIN) {
                 ++ui16_wheel_speed_sensor_ticks_counter;
             }
@@ -902,7 +903,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                 ui16_wheel_speed_sensor_ticks_counter = 0;
                 ui8_wheel_speed_sensor_ticks_counter_started = 0;
             }
-
+		}
 
         /****************************************************************************/
         /*
@@ -982,7 +983,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
     }
 
     /****************************************************************************/
-    irq_end:
+    //irq_end:
     // clears the TIM1 interrupt TIM1_IT_UPDATE pending bit
     TIM1->SR1 = (uint8_t) (~(uint8_t) TIM1_IT_CC4);
 }

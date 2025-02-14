@@ -24,6 +24,7 @@ extern volatile uint8_t ui8_adc_motor_phase_current;
 extern volatile uint8_t ui8_controller_adc_battery_current_target;
 extern volatile uint8_t ui8_g_duty_cycle;
 extern volatile uint8_t ui8_fw_hall_counter_offset;
+extern volatile uint8_t ui8_fw_hall_counter_offset_max;
 extern volatile uint8_t ui8_field_weakening_enabled;
 extern volatile uint16_t ui16_hall_counter_total;
 extern volatile uint8_t ui8_controller_duty_cycle_target;
@@ -34,7 +35,7 @@ extern volatile uint8_t ui8_hall_counter_offsets[6];
 extern volatile uint8_t ui8_hall_sensors_state;
 
 // FOC angle calculation parameter
-extern uint8_t ui8_foc_angle_multiplicator;
+extern uint8_t ui8_foc_angle_multiplier;
 
 // Sensors
 extern volatile uint8_t ui8_brake_state;
@@ -44,7 +45,6 @@ extern volatile uint16_t ui16_adc_throttle;
 
 // cadence sensor
 extern volatile uint16_t ui16_cadence_sensor_ticks;
-//extern volatile uint32_t ui32_crank_revolutions_x20;
 
 // wheel speed sensor
 extern volatile uint16_t ui16_wheel_speed_sensor_ticks;

@@ -1,3 +1,25 @@
+TSDZ2 Open Source Firmware v20.1C.5-update-1 for 860C display
+  1 - Improved field weakening feature.
+  2 - Increased motor blocked check time (e 4).
+  3 - Increased minimum rpm for motor reactivation (by dzid26).
+  4 - All errors are reset only by turning the display off.
+  5 - Added history of last 4 errors.
+  6 - Error and warning message priority changed.
+  7 - Added startup assist level choice.
+  8 - Added startup riding mode choice.
+  9 - Added "Speed ​​limit" warning message.
+ 10 - Added "Voltage cut-off" warning message.
+ 11 - Added details to Service A and B warnings.
+ 12 - Battery charge cycles, editable field.
+ 13 - Fixed bugs in auto reset of trips A and B.
+ 14 - Fixed bugs in SOC auto calculation.
+ 15 - Improved automatic lights on/off.
+ 16 - With Reset to defaults, Odometer and Charge cycles are retained.
+ 17 - Changed filters for displaying motor power.
+ 18 - Added "e 9 Undervoltage" error message.
+ 19 - Cut PWM above speed limit (by dzid26).
+ 20 - Added overcurrent error delay in "Motor" menu (e 7)
+
 TSDZ2 Open Source Firmware v20.1C.5 for 860C display
   1 - Updated to v15 version of mspider65 (optimized FOC angle calculation)
   2 - Added "Smooth start" feature for Hybrid and Torque mode.
@@ -23,14 +45,15 @@ TSDZ2 Open Source Firmware v20.1C.4 update 4 for 860C display
 
 TSDZ2 Open Source Firmware v20.1C.4 update 3 for 860C display
   1 - Anti-tampering measure.
-      Added password to parameters regarding speed limit, motor power, use of throttle and cruise.
+      Added password to parameters regarding:
+      speed limit, motor power, use of throttle and cruise.
   2 - Startup assist. Added speed limit to 6 km/h.
   3 - Choice of temperature sensor, LM35 or TMP36.
   4 - Choice of brake input, brake sensors or on/off thermostat (NO max 85°C).
   5 - Choosing how to use the throttle.
   6 - Choosing how to use the cruise.
-  7 - Added motor overcurrent check (by mspider65), e7 Overcurrent error.
-  8 - Added throttle input check on power up, e5 Throttle fault.
+  7 - Added motor overcurrent check (by mspider65), (e 7) Overcurrent error.
+  8 - Added throttle input check on power up, (e 5) Throttle fault.
 Changed files
   main.h
   ebike_app.c
@@ -105,7 +128,7 @@ TSDZ2 Open Source Firmware v20.1C.2 for 860C display
   4 - Decreased eMTB torque offset, it was too sensitive at the start.
   5 - Added "Motor fast stop" for a quick stop of the motor.
   6 - Added "Motor deceleration" adjustable 0-100%, alternative to "Motor fast stop".
-  7 - Speed sensor error threshold time increased (E08).
+  7 - Speed sensor error threshold time increased (e 8).
   8 - Added enable / disable "Field Weakening".
   9 - PWM display in percentage 0-100%
  10 - Added to 860C, Motor power threshold (auto / manual) for field and graph.
@@ -136,7 +159,7 @@ Added file
 
 TSDZ2 Open Source Firmware v20.1C.1 for 860C display
   1 - temperature problem fixed.
-  2 - Torque sensor error threshold changed (E02).
+  2 - Torque sensor error threshold changed (e 2).
 Changed files
   ebike_app.c
 
