@@ -17,7 +17,7 @@ This project is being developed and maintained for free by a community of users.
 
 For more details, see the project page: https://github.com/OpenSource-EBike-firmware/TSDZ2_wiki/wiki
 
-Additional wiki for this version: https://github.com/emmebrusa/TSDZ2-Smart-EBike-860C/wiki
+Display Configuration Guide for this version: [https://github.com/emmebrusa/TSDZ2-Smart-EBike-860C/wiki](https://github.com/emmebrusa/TSDZ2-Smart-EBike-860C/blob/master/manuals/TSDZ2-OSF-V20.1C.5-1-860C-Display-Configuration-Guide.pdf)
 
 Source code 860C Color LCD: https://github.com/emmebrusa/Color_LCD_860C
 
