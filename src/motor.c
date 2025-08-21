@@ -354,7 +354,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 		else {
             // Verify if rotor stopped (< 10 ERPS)
             // ui16_a - ui16_b = Hall counter ticks from the last Hall sensor transition;
-            if ((ui16_a - ui16_b) > (HALL_COUNTER_FREQ/MOTOR_ROTOR_INTERPOLATION_MIN_ERPS/6)) {
+            if ((uint16_t)(ui16_a - ui16_b) > (HALL_COUNTER_FREQ/MOTOR_ROTOR_INTERPOLATION_MIN_ERPS/6)) {
                 ui8_motor_commutation_type = BLOCK_COMMUTATION;
                 ui8_g_foc_angle = 0;
                 ui8_hall_360_ref_valid = 0;
@@ -553,7 +553,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         */
 
             ld a, _ui8_temp+0     // ui8_svm_table_index is stored in ui8_temp
-            add a, #0x55          // ui8_temp = ui8_svm_table[(uint8_t) (ui8_svm_table_index + 85 /* 120º */)];
+            add a, #0x55          // ui8_temp = ui8_svm_table[(uint8_t) (ui8_svm_table_index + 85 /* 120deg */)];
             clrw x
             ld  xl, a
             ld  a, (_ui8_svm_table+0, x)
@@ -776,7 +776,6 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
         }
 		else {
             // set brake state
-            //ui8_brake_state = ((BRAKE__PORT->IDR & BRAKE__PIN) ^ BRAKE__PIN);
 			ui8_brake_state = ((BRAKE__PORT->IDR & (uint8_t)BRAKE__PIN) == 0);
         }
 		
@@ -821,7 +820,10 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                 ui8_counter_duty_cycle_ramp_up = 0;
 
                 // increment duty cycle
-                if (ui8_g_duty_cycle < PWM_DUTY_CYCLE_MAX) {
+				if (ui8_g_duty_cycle < PWM_DUTY_CYCLE_STARTUP) {
+                    ui8_g_duty_cycle = PWM_DUTY_CYCLE_STARTUP;
+                }	
+                else if (ui8_g_duty_cycle < PWM_DUTY_CYCLE_MAX) {
                     ui8_g_duty_cycle++;
                 }
             }

@@ -463,22 +463,24 @@ static void ebike_control_motor(void)
 	
     // check if the motor should be enabled or disabled
     if (ui8_motor_enabled
-		&& ((ui8_m_system_state & ERROR_MOTOR_BLOCKED)
+		&& ((ui8_brake_state)
+			|| (ui8_m_system_state & ERROR_MOTOR_BLOCKED)
 			|| (ui8_m_system_state & ERROR_BATTERY_OVERCURRENT)
 			|| (ui8_m_system_state & ERROR_THROTTLE)
 			|| (ui8_m_system_state & ERROR_FATAL)
-			|| ((ui16_motor_speed_erps == 0)
-				&& (!ui8_adc_battery_current_target)
-				&& (!ui8_g_duty_cycle)))) {
+			|| ((ui16_motor_speed_erps == 0U)
+				&& (ui8_adc_battery_current_target == 0U)
+				&& (ui8_g_duty_cycle == 0U)))) {
         ui8_motor_enabled = 0;
         motor_disable_pwm();
     }
 	else if (!ui8_motor_enabled
+			&& (!ui8_brake_state)
 			&& (ui16_motor_speed_erps < ERPS_SPEED_OF_MOTOR_REENABLING) // enable the motor only if it rotates slowly or is stopped
-			&& (ui8_adc_battery_current_target)
-			&& (!ui8_brake_state)) {
+			&& (ui8_adc_battery_current_target > 0U)) {
 		ui8_motor_enabled = 1;
-		ui8_g_duty_cycle = PWM_DUTY_CYCLE_STARTUP;
+		ui8_g_duty_cycle = 0;
+		//ui8_g_duty_cycle = PWM_DUTY_CYCLE_STARTUP;
 		//ui8_duty_cycle_ramp_up_inverse_step = PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN;
 		//ui8_duty_cycle_ramp_down_inverse_step = PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_MIN;
 		ui8_fw_hall_counter_offset = 0;
