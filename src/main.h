@@ -66,21 +66,23 @@
 #define PWM_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN                 (uint8_t)(PWM_CYCLES_SECOND/781)
 #define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_DEFAULT           (uint8_t)(PWM_CYCLES_SECOND/260)
 #define PWM_DUTY_CYCLE_RAMP_DOWN_INVERSE_STEP_MIN               (uint8_t)(PWM_CYCLES_SECOND/1953)
-#define CRUISE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP                  (uint8_t)(PWM_CYCLES_SECOND/78)
+#define CRUISE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP                  (uint8_t)(PWM_CYCLES_SECOND/200)
 #define WALK_ASSIST_DUTY_CYCLE_RAMP_UP_INVERSE_STEP             (uint8_t)(PWM_CYCLES_SECOND/78)
-#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT        (uint8_t)(PWM_CYCLES_SECOND/78)
+#define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_DEFAULT        (uint8_t)(PWM_CYCLES_SECOND/116)
 #define THROTTLE_DUTY_CYCLE_RAMP_UP_INVERSE_STEP_MIN            (uint8_t)(PWM_CYCLES_SECOND/390)
 
-#define MOTOR_OVER_SPEED_ERPS                                   ((PWM_CYCLES_SECOND/29) < 650 ?  (PWM_CYCLES_SECOND/29) : 650) // motor max speed | 29 points for the sinewave at max speed (less than PWM_CYCLES_SECOND/29)
+#define MOTOR_OVER_SPEED_ERPS                                   ((PWM_CYCLES_SECOND/29) < 656 ?  (PWM_CYCLES_SECOND/29) : 656) // motor max speed | 29 points for the sinewave at max speed (less than PWM_CYCLES_SECOND/29)
 #define MOTOR_SPEED_FIELD_WEAKENING_MIN							490 // 90 rpm
 #define ERPS_SPEED_OF_MOTOR_REENABLING							320 // 60 rpm
 
 // cadence
 #define CADENCE_SENSOR_CALC_COUNTER_MIN                         (uint16_t)((uint32_t)PWM_CYCLES_SECOND*100U/446U)	// 3500 at 15.625KHz
 #define CADENCE_SENSOR_TICKS_COUNTER_MIN_AT_SPEED               (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/558U)	// 280 at 15.625KHz
-#define CADENCE_TICKS_STARTUP                                   (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/25U)		// ui16_cadence_sensor_ticks value for startup. About 7-8 RPM (6250 at 15.625KHz)
+//#define CADENCE_TICKS_STARTUP                                   (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/25U)  	// ui16_cadence_sensor_ticks value for startup. About 7-8 RPM (6250 at 15.625KHz)
+#define CADENCE_TICKS_STARTUP                                   (uint16_t)((uint32_t)PWM_CYCLES_SECOND*100U/36U)	// About 1 RPM
 //#define CADENCE_SENSOR_STANDARD_MODE_SCHMITT_TRIGGER_THRESHOLD	(uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/446U)	// software based Schmitt trigger to stop motor jitter when at resolution limits (350 at 15.625KHz)
-#define CADENCE_SENSOR_STANDARD_MODE_SCHMITT_TRIGGER_THRESHOLD	(uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/892U)	// Quick stop value as version 4.4
+//#define CADENCE_SENSOR_STANDARD_MODE_SCHMITT_TRIGGER_THRESHOLD	(uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/892U)	// Quick stop value as version 4.4
+#define CADENCE_SENSOR_STANDARD_MODE_SCHMITT_TRIGGER_THRESHOLD	0   // no motor jitter found
 
 // Wheel speed sensor
 #define WHEEL_SPEED_SENSOR_TICKS_COUNTER_MAX                    (uint16_t)((uint32_t)PWM_CYCLES_SECOND*10U/1157U)   // (135 at 15,625KHz) something like 200 m/h with a 6'' wheel
@@ -120,7 +122,7 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
 
 #define HALL_COUNTER_OFFSET_DOWN                (HALL_COUNTER_FREQ/PWM_CYCLES_SECOND/2 + 17)
 #define HALL_COUNTER_OFFSET_UP                  (HALL_COUNTER_OFFSET_DOWN + 21)
-#define FW_HALL_COUNTER_OFFSET_MAX              5 // 5*4=20us max time offset
+#define FW_HALL_COUNTER_OFFSET_MAX              3 // 3*4=12us max time offset
 
 #define MOTOR_ROTOR_INTERPOLATION_MIN_ERPS      10
 
@@ -140,6 +142,10 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
 #define ADC_TORQUE_SENSOR_ANGLE_COEFF_X10		(uint8_t)(ADC_TORQUE_SENSOR_ANGLE_COEFF * 10)
 // scale the torque assist target current
 #define TORQUE_ASSIST_FACTOR_DENOMINATOR		120
+
+// extended boost
+#define ADC_TORQUE_SENSOR_MAX_INCREMENT			20
+#define EXTENDED_BOOST_MULTIPLIER_MAX_VALUE		5 // settable on display
 
 // smooth start ramp
 #define SMOOTH_START_RAMP_DEFAULT				165 // 35% (255=0% long ramp)
@@ -162,9 +168,13 @@ HALL_COUNTER_OFFSET_UP:    29 -> 44
  controller is 16 A and it should not be exceeded.
  ---------------------------------------------------------*/
 
-// throttle ADC values
-#define ADC_THROTTLE_MIN_VALUE                                    47
-#define ADC_THROTTLE_MAX_VALUE                                    176
+// motor temperature limit values (editable from the display)
+#define MOTOR_TEMPERATURE_MIN_LIMIT_VALUE						65
+#define MOTOR_TEMPERATURE_MAX_LIMIT_VALUE						85
+
+// throttle ADC limit values (editable from the display)
+#define ADC_THROTTLE_MIN_VALUE									47
+#define ADC_THROTTLE_MAX_VALUE									176
 
 /*---------------------------------------------------------
  NOTE: regarding throttle ADC values

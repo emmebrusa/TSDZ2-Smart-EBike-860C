@@ -1,3 +1,42 @@
+TSDZ2 Open Source Firmware v20.1C.5-update-2 for 860C display
+  1 - Added motor efficiency calculation to be displayed in numeric and graphic fields.
+  2 - Added "Low efficiency" warning message, with adjustable threshold.
+  3 - Added distance that can be traveled with remaining battery capacity.
+  4 - Fixed bugs in reset to default.
+  5 - Improved automatic SOC reset.
+  6 - Set SOC text for each screen (soc%, voltage, distance).
+  7 - Levels set the power target in Cadence Assist mode.
+  8 - Changed the scale of the displayed value of the foc angle, from 360 to 256.
+  9 - Increased motor blocked check time (e 4 error).
+ 10 - Added torque sensor check time (e 2 error).
+ 11 - Fixed bug in overcurrent delay (e 7 error).
+ 12 - Added power-on current check (e 5 shared with THROTTLE error).
+ 13 - Startup assist, the speed limit follows the same rules as the throttle.
+ 14 - Added auto modes to Startup assist, with adjustable time and threshold.
+ 15 - Optimized cruise control and walk assist.
+ 16 - Added "auto" mode to startup boost.
+ 17 - Throttle ADC min and max values ​​editable on the display.
+ 18 - Temperature warning and error, minimum display time added.
+ 19 - Moved "Virtual throttle step" to the Throttle/Temperature menu.
+ 20 - Moved "Charge cycles" to the Battery menu.
+ 21 - Added "Lights" disable/enable to the Various menu.
+ 22 - Stop odometer if communication is lost.
+ 23 - Motor power setting via hotkey removed.
+ 24 - Changed the start and stop cadence ticks.
+ 25 - Fixed the display of "ADC torque boost" in the technical menu.
+ 26 - Decreased FW_HALL_COUNTER_OFFSET_MAX (Field weakening angle).
+ 27 - Improved E03 cadence sensor error.
+ 28 - Fixed the torque offset adj in eMTB mode.
+ 29 - Constant power feature in torque-based modes.
+ 30 - Added Extended boost feature.
+ 21 - Fixed an overflow bug in the motor power display (by prozyc).
+ 32 - Street mode menu removed, merged into Bike menu.
+
+TSDZ2 Open Source Firmware v20.1C.5-update-1.1 for 860C display
+  1 - Fixed message display problem.
+  2 - Increased power and current limits for TSDZ8.
+  3 - Fixed PWM_DUTY_CYCLE_STARTUP bug.
+
 TSDZ2 Open Source Firmware v20.1C.5-update-1 for 860C display
   1 - Improved field weakening feature.
   2 - Increased motor blocked check time (e 4).
@@ -19,6 +58,9 @@ TSDZ2 Open Source Firmware v20.1C.5-update-1 for 860C display
  18 - Added "e 9 Undervoltage" error message.
  19 - Cut PWM above speed limit (by dzid26).
  20 - Added overcurrent error delay in "Motor" menu (e 7)
+ 21 - Update February 16, 2025, Fixed message display problem.
+ 22 - Update July 28, 2025 - v20.1C.5-1-1 Increased power and current limits for TSDZ8
+ 23 - Update August 21, 2025 - v20.1C.5-1-1 Fixed PWM_DUTY_CYCLE_STARTUP bug.
 
 TSDZ2 Open Source Firmware v20.1C.5 for 860C display
   1 - Updated to v15 version of mspider65 (optimized FOC angle calculation)

@@ -15,6 +15,7 @@
 // startup boost mode
 #define CADENCE						0
 #define SPEED						1
+#define AUTO_BOOST					2
 
 // cadence sensor
 extern uint16_t ui16_cadence_ticks_count_min_speed_adj;

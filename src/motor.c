@@ -67,7 +67,6 @@ volatile uint8_t ui8_controller_duty_cycle_target = 0;
 volatile uint8_t ui8_g_foc_angle = 0;
 // Field Weakening Hall offset (added during interpolation)
 volatile uint8_t ui8_fw_hall_counter_offset = 0;
-volatile uint8_t ui8_fw_hall_counter_offset_max = 0;
 volatile uint8_t ui8_field_weakening_enabled = 0;
 
 // Duty cycle ramp up
@@ -551,9 +550,10 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             ui16_c = (uint8_t)(MIDDLE_PWM_COUNTER - (uint8_t) (ui16_c >> 8)) << 1;
         }
         */
-
-            ld a, _ui8_temp+0     // ui8_svm_table_index is stored in ui8_temp
-            add a, #0x55          // ui8_temp = ui8_svm_table[(uint8_t) (ui8_svm_table_index + 85 /* 120deg */)];
+			// ui8_svm_table_index is stored in ui8_temp
+            ld a, _ui8_temp+0
+            // ui8_temp = ui8_svm_table[(uint8_t) (ui8_svm_table_index + 85 /* 120deg */)];
+			add a, #0x55
             clrw x
             ld  xl, a
             ld  a, (_ui8_svm_table+0, x)
@@ -659,7 +659,12 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 
         // calculate motor phase current ADC value and update ui8_g_foc_angle
         if (ui8_g_duty_cycle > 0) {
-            ui8_adc_motor_phase_current = (uint16_t)((uint16_t)((uint16_t)ui8_adc_battery_current_filtered << 8)) / ui8_g_duty_cycle;
+            uint16_t ui16_temp = ((uint16_t)((uint16_t)ui8_adc_battery_current_filtered << 8)) / ui8_g_duty_cycle;
+			if (ui16_temp > #0x00ff)
+				ui8_adc_motor_phase_current = #0xff
+			else
+				ui8_adc_motor_phase_current = (uint8_t)(ui16_temp & 0xff);
+			
             if (ui8_foc_flag) {
 				ui8_adc_foc_angle_current = (ui8_adc_battery_current_filtered >> 1) + (ui8_adc_motor_phase_current >> 1);
                 ui8_foc_flag = (uint16_t)(ui8_adc_foc_angle_current * ui8_foc_angle_multiplier) / 256;
@@ -700,21 +705,27 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 
         tnz _ui8_g_duty_cycle+0                     // if (ui8_g_duty_cycle > 0)
         jreq 00051$
-        clrw x          // ui8_adc_motor_phase_current = (ui8_adc_battery_current_filtered << 8)) / ui8_g_duty_cycle;
+		// ui8_adc_motor_phase_current = ((uint16_t)ui8_adc_battery_current_filtered << 8)) / ui8_g_duty_cycle;
+        clrw x
         ld  xh, a
         ld  a, _ui8_g_duty_cycle+0
         div x, a
         ld  a, xl
-        ld  _ui8_adc_motor_phase_current+0, a
-		
+		// if ((uint16_t)ui8_adc_motor_phase_current > #0x00ff) { ui8_adc_motor_phase_current = #0xff; }
+		cpw	x, #0x00ff
+		jrc 00054$
+		ld  a, #0xff
+	00054$:
+		ld  _ui8_adc_motor_phase_current+0, a
+		// ui8_adc_foc_angle_current = (ui8_adc_battery_current_filtered >> 1) + (ui8_adc_motor_phase_current >> 1);
 		mov	_ui8_adc_foc_angle_current+0, _ui8_adc_battery_current_filtered+0
 		srl	_ui8_adc_foc_angle_current+0
 		ld	a, _ui8_adc_motor_phase_current+0
 		srl	a
 		add	a, _ui8_adc_foc_angle_current+0
 		ld	_ui8_adc_foc_angle_current+0, a
-		
-        tnz _ui8_foc_flag+0 // if (ui8_foc_flag)
+		// if (ui8_foc_flag)
+        tnz _ui8_foc_flag+0
         jreq 00052$
         // ui8_foc_flag = (uint16_t)(ui8_adc_foc_angle_current * ui8_foc_angle_multiplier) / 256;
 		ld  a, _ui8_adc_foc_angle_current+0
@@ -722,9 +733,10 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
 		ld  xl, a
 		ld  a, _ui8_foc_angle_multiplier+0
         mul x, a
+		// if (ui8_foc_flag > 13)
         ld  a, xh
         ld  _ui8_foc_flag+0, a
-        cp  a, #0x0d    // if (ui8_foc_flag > 13)
+        cp  a, #0x0d
         jrule   00053$
         mov _ui8_foc_flag+0, #0x0d
     00053$:
@@ -829,7 +841,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
             }
         }
 		else if ((ui8_field_weakening_enabled)
-				&& (ui8_g_duty_cycle == PWM_DUTY_CYCLE_MAX)) {
+		  && (ui8_g_duty_cycle == PWM_DUTY_CYCLE_MAX)) {
             // reset duty cycle ramp down counter (filter)
             ui8_counter_duty_cycle_ramp_down = 0;
 
@@ -837,7 +849,7 @@ void TIM1_CAP_COM_IRQHandler(void) __interrupt(TIM1_CAP_COM_IRQHANDLER)
                ui8_counter_duty_cycle_ramp_up = 0;
 
                // increment field weakening angle
-               if (ui8_fw_hall_counter_offset < ui8_fw_hall_counter_offset_max) {
+               if (ui8_fw_hall_counter_offset < FW_HALL_COUNTER_OFFSET_MAX) {
                    ui8_fw_hall_counter_offset++;
 			   }
             }
